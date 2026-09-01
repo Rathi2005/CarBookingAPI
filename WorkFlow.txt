@@ -1,0 +1,945 @@
+Below is a complete updated prompt you can copy into a new chat to continue from the same point.
+
+```text
+I am learning C# OOP and ASP.NET Core Web API in parallel. Please continue teaching me from where I left off.
+
+Teaching style I want:
+- Explain concepts simply first.
+- Use small scenario-based activities.
+- Let me write code.
+- Check my code and explain mistakes clearly.
+- Increase difficulty gradually.
+- Use C# examples only.
+- Prefer practical project-based learning.
+- Do not jump too fast.
+- Give me tasks after explaining.
+- When I send code, review it and suggest improvements.
+- Keep explanations beginner-friendly but accurate.
+
+C# OOP topics I have already completed:
+1. Arrays basics and common methods.
+2. Class and Object.
+3. Constructor and this keyword.
+4. Encapsulation using private fields and setter methods.
+5. Properties using get, set, value, and auto-properties.
+6. Inheritance using Person, Student, Teacher.
+7. base(name, age) and parent constructor calls.
+8. Polymorphism using virtual and override.
+9. Abstract classes and abstract methods.
+10. Access modifier basics: private, public, protected.
+11. Interfaces using IDisplayable.
+12. Interface implementation does not use override.
+13. Multiple interfaces using IDisplayable and IPayable.
+14. Abstract class + interface together.
+15. Access modifiers deep dive.
+16. Method overloading.
+17. Method overriding vs method hiding basics.
+18. List<T> basics with objects.
+19. Service class concept.
+20. Basic project folders: Models and Services.
+21. ASP.NET Core Web API basics with Controllers and Swagger.
+22. Dependency Injection basics using AddSingleton.
+23. DTO/request classes.
+24. Basic validation manually and then with Data Annotations.
+25. Service-to-service dependency.
+26. Status constants using a static class.
+27. Interfaces for services.
+28. Dependency Injection lifetimes: AddSingleton, AddScoped, AddTransient.
+29. Basic EF Core setup and first migration.
+
+Important corrections I learned:
+- Constructor should be public if called from Main or outside the class.
+- Static methods cannot access instance fields directly.
+- Use instance methods like Display() for object data.
+- If using private fields, use properties or methods to access them.
+- Auto-property public int Age { get; set; } creates hidden storage.
+- Do not create both private int age and public int Age { get; set; } unless the property uses the field.
+- Avoid property recursion like get { return Name; } set { Name = value; }.
+- Correct full property uses a private field:
+  private string name;
+  public string Name
+  {
+      get { return name; }
+      set { name = value; }
+  }
+- Use protected for parent class data if child classes need access.
+- Abstract method has no body and must be overridden by child classes.
+- Virtual method has a body and may be overridden.
+- base(name, age) calls the parent constructor.
+- Interface methods are implemented without override.
+- Use override only for abstract/virtual methods from a parent class.
+- In C#, a class can inherit from only one class but can implement many interfaces.
+- When combining inheritance and interfaces, base class comes first:
+  public class Teacher : Person, IDisplayable, IPayable
+- For method overriding, use virtual in parent and override in child.
+- For method hiding, use new, but it is not true runtime polymorphism.
+- Use int.TryParse instead of Convert.ToInt32 when validating console input.
+- Use string.IsNullOrWhiteSpace to validate text input manually.
+- In Web API, services should return data/status/results, controllers should return HTTP responses.
+- Use [HttpPut("{id:int}")] not [HttpPut("{id : int}")].
+- Prefer [FromBody] for request body.
+- Prefer clear variable names like updated, deleted, owner, customer, booking.
+- Return BadRequest for invalid route IDs.
+- Return NotFound when service cannot find data.
+- Return CreatedAtAction for POST create endpoints.
+- Use ActionResult<T> in controllers.
+- Interface implementation does not use override.
+- With [ApiController], Data Annotation validation can automatically return 400 Bad Request.
+- Route values like id still need manual validation.
+- Data Annotations can validate format/range, but cannot check if related data exists.
+- Business validation like “owner exists”, “car is available”, “customer exists” stays in controller/service logic.
+- Car availability should not be manually updated through normal car update anymore.
+- Car availability should change through booking actions:
+  Create booking -> IsAvailable = false
+  Cancel booking -> IsAvailable = true
+  Complete booking -> IsAvailable = true
+- AddSingleton is okay for current in-memory lists.
+- EF Core DbContext uses scoped lifetime.
+- Services using AppDbContext should be registered with AddScoped.
+- Do not inject scoped service into singleton service.
+- Once a service is registered as interface mapping, inject the interface, not the concrete class:
+  builder.Services.AddScoped<IOwnerService, OwnerService>();
+  public OwnersController(IOwnerService ownerService)
+
+.NET setup:
+- Editor: Visual Studio
+- Operating System: Windows
+- Application type: ASP.NET Core Web API using Controllers and Swagger
+- Database: SQL Server LocalDB
+- SQL Server instance verified:
+  (localdb)\MSSQLLocalDB
+- SSMS is installed and working.
+- EF Core packages installed:
+  Microsoft.EntityFrameworkCore.SqlServer
+  Microsoft.EntityFrameworkCore.Tools
+  Microsoft.EntityFrameworkCore.Design
+- Authentication: not yet
+- Authorization: not yet
+- Async/await: not yet
+- Current EF Core conversion is in progress.
+
+Current real project:
+Project name:
+CarBookingAPI
+
+Important clarification:
+Although project name is CarBookingAPI, the actual project idea is a trip booking platform.
+It is like a platform where:
+- Owners register their cars.
+- Customers browse available cars.
+- Customers book cars for trips.
+- Fare is based on price per kilometer, not price per day.
+- Similar idea to Rapido/Uber-style trip booking.
+- Later, owners/customers/admins will have login and roles.
+
+Main entities:
+1. Owner
+2. Car
+3. Customer
+4. TripBooking
+
+Relationship idea:
+- Owner owns/registers cars.
+- Car has OwnerId.
+- Customer does not connect directly to Car.
+- Customer connects to Car through TripBooking.
+- TripBooking has CustomerId and CarId.
+
+Current folder structure:
+CarBookingAPI
+│
+├── Controllers
+│   ├── CarsController.cs
+│   ├── OwnersController.cs
+│   ├── CustomersController.cs
+│   └── TripBookingsController.cs
+│
+├── Data
+│   └── AppDbContext.cs
+│
+├── DTOs
+│   ├── CreateCarRequest.cs
+│   ├── UpdateCarRequest.cs
+│   ├── CreateOwnerRequest.cs
+│   ├── UpdateOwnerRequest.cs
+│   ├── CreateCustomerRequest.cs
+│   ├── UpdateCustomerRequest.cs
+│   ├── CreateTripBookingRequest.cs
+│   └── TripBookingResult.cs
+│
+├── Interfaces
+│   ├── ICarService.cs
+│   ├── IOwnerService.cs
+│   ├── ICustomerService.cs
+│   └── ITripBookingService.cs
+│
+├── Models
+│   ├── Car.cs
+│   ├── Owner.cs
+│   ├── Customer.cs
+│   ├── TripBooking.cs
+│   └── TripBookingStatus.cs
+│
+├── Services
+│   ├── CarService.cs
+│   ├── OwnerService.cs
+│   ├── CustomerService.cs
+│   └── TripBookingService.cs
+│
+├── Migrations
+├── Program.cs
+├── appsettings.json
+├── appsettings.Development.json
+└── CarBookingAPI.csproj
+
+DTO cleanup is done:
+- DTO/request/result classes moved from Models folder to DTOs folder.
+- Namespace changed from CarBookingAPI.Models to CarBookingAPI.DTOs.
+- Controllers/services/interfaces updated with:
+  using CarBookingAPI.DTOs;
+  using CarBookingAPI.Models;
+- Project runs after DTO cleanup.
+
+Current model details:
+
+Car model:
+- Id
+- OwnerId
+- Brand
+- Model
+- Year
+- PricePerKm
+- IsAvailable
+- Constructor previously sets IsAvailable = true by default.
+- For EF Core, may need empty constructor if not already added.
+
+Owner model:
+- Id
+- Name
+- PhoneNumber
+- Email
+- Empty constructor added or should be added for EF Core.
+- Parameter constructor may still exist.
+
+Customer model:
+- Id
+- Name
+- PhoneNumber
+- Email
+- Empty constructor should be added/has been planned for EF Core.
+- Parameter constructor may still exist.
+
+TripBooking model:
+- Id
+- CustomerId
+- CarId
+- PickupLocation
+- DropLocation
+- DistanceInKm
+- TotalPrice
+- BookingDate
+- Status
+- Constructor sets:
+  BookingDate = DateTime.Now
+  Status = TripBookingStatus.Active
+- For EF Core, may need empty constructor if not already added.
+
+TripBookingStatus static class:
+public static class TripBookingStatus
+{
+    public const string Active = "Active";
+    public const string Cancelled = "Cancelled";
+    public const string Completed = "Completed";
+}
+
+DTO/request classes:
+
+CreateCarRequest:
+- OwnerId
+- Brand
+- Model
+- Year
+- PricePerKm
+
+UpdateCarRequest:
+- OwnerId
+- Brand
+- Model
+- Year
+- PricePerKm
+
+Important:
+IsAvailable was removed from UpdateCarRequest so users cannot manually change availability from normal car update.
+
+CreateOwnerRequest:
+- Name
+- PhoneNumber
+- Email
+
+UpdateOwnerRequest:
+- Name
+- PhoneNumber
+- Email
+
+CreateCustomerRequest:
+- Name
+- PhoneNumber
+- Email
+
+UpdateCustomerRequest:
+- Name
+- PhoneNumber
+- Email
+
+CreateTripBookingRequest:
+- CustomerId
+- CarId
+- PickupLocation
+- DropLocation
+- DistanceInKm
+
+TotalPrice is NOT sent by user.
+It is calculated by system:
+TotalPrice = DistanceInKm * car.PricePerKm
+
+TripBookingResult is added in DTOs:
+using CarBookingAPI.Models;
+
+namespace CarBookingAPI.DTOs
+{
+    public class TripBookingResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public TripBooking? Booking { get; set; }
+
+        public static TripBookingResult Ok(string message, TripBooking booking)
+        {
+            return new TripBookingResult
+            {
+                Success = true,
+                Message = message,
+                Booking = booking
+            };
+        }
+
+        public static TripBookingResult Fail(string message)
+        {
+            return new TripBookingResult
+            {
+                Success = false,
+                Message = message,
+                Booking = null
+            };
+        }
+    }
+}
+
+Validation stage:
+Data Annotation validation is already done.
+
+Customer DTO validation:
+- [Required]
+- [StringLength]
+- [EmailAddress]
+
+Owner DTO validation:
+- [Required]
+- [StringLength]
+- [EmailAddress]
+
+Car DTO validation:
+- [Range] for OwnerId
+- [Required], [StringLength] for Brand
+- [Required], [StringLength] for Model
+- [Range] for Year
+- [Range] for PricePerKm
+
+TripBooking DTO validation:
+- [Range] for CustomerId
+- [Range] for CarId
+- [Required], [StringLength] for PickupLocation
+- [Required], [StringLength] for DropLocation
+- [Range] for DistanceInKm
+
+Manual validation removed from controllers for request body where Data Annotations are used.
+Still keeping:
+- Route ID validation like id <= 0
+- Business validation like owner/customer/car exists
+- Car availability check
+
+Current interfaces:
+ICarService:
+- List<Car> GetAllCars()
+- Car? GetCarById(int id)
+- List<Car> GetAvailableCars()
+- List<Car> GetCarsByOwnerId(int ownerId)
+- Car AddCar(CreateCarRequest request)
+- Car? UpdateCar(int id, UpdateCarRequest request)
+- bool DeleteCar(int id)
+- bool SetCarAvailability(int carId, bool isAvailable)
+
+IOwnerService:
+- List<Owner> GetAllOwners()
+- Owner? GetOwnerById(int id)
+- Owner AddOwner(CreateOwnerRequest request)
+- Owner? UpdateOwner(int id, UpdateOwnerRequest request)
+- bool DeleteOwner(int id)
+
+ICustomerService:
+- List<Customer> GetAllCustomers()
+- Customer? GetCustomerById(int id)
+- Customer AddCustomer(CreateCustomerRequest request)
+- Customer? UpdateCustomer(int id, UpdateCustomerRequest request)
+- bool DeleteCustomer(int id)
+
+ITripBookingService:
+- List<TripBooking> GetAllBookings()
+- TripBooking? GetBookingById(int id)
+- TripBookingResult CreateBooking(CreateTripBookingRequest request)
+- TripBookingResult CancelBooking(int id)
+- TripBookingResult CompleteBooking(int id)
+- List<TripBooking> GetBookingsByCustomerId(int customerId)
+- List<TripBooking> GetBookingsByCarId(int carId)
+- List<TripBooking> GetBookingsByOwnerId(int ownerId)
+
+Current services before/while EF conversion:
+
+CarService:
+- Currently still in-memory List<Car>.
+- Uses private List<Car> cars.
+- Uses nextCarId.
+- Implements ICarService.
+- Methods:
+  GetAllCars()
+  GetCarById(int id)
+  GetAvailableCars()
+  GetCarsByOwnerId(int ownerId)
+  AddCar(CreateCarRequest request)
+  UpdateCar(int id, UpdateCarRequest request)
+  DeleteCar(int id)
+  SetCarAvailability(int carId, bool isAvailable)
+- Important:
+  IsAvailable should not be updated through normal UpdateCar.
+  Car availability changes through TripBooking actions.
+
+OwnerService:
+- Converted to EF Core.
+- Uses AppDbContext.
+- Implements IOwnerService.
+- No longer uses List<Owner>.
+- No longer uses nextOwnerId.
+- Owner IDs are generated by SQL Server.
+- Owner can be saved and verified in dbo.Owners table in SSMS.
+- This is done and working.
+
+OwnerService EF Core pattern:
+using CarBookingAPI.Data;
+using CarBookingAPI.DTOs;
+using CarBookingAPI.Interfaces;
+using CarBookingAPI.Models;
+
+namespace CarBookingAPI.Services
+{
+    public class OwnerService : IOwnerService
+    {
+        private readonly AppDbContext context;
+
+        public OwnerService(AppDbContext context)
+        {
+            this.context = context;
+        }
+
+        public List<Owner> GetAllOwners()
+        {
+            return context.Owners.ToList();
+        }
+
+        public Owner? GetOwnerById(int id)
+        {
+            return context.Owners.FirstOrDefault(owner => owner.Id == id);
+        }
+
+        public Owner AddOwner(CreateOwnerRequest request)
+        {
+            Owner owner = new Owner
+            {
+                Name = request.Name,
+                PhoneNumber = request.PhoneNumber,
+                Email = request.Email
+            };
+
+            context.Owners.Add(owner);
+            context.SaveChanges();
+
+            return owner;
+        }
+
+        public Owner? UpdateOwner(int id, UpdateOwnerRequest request)
+        {
+            Owner? owner = GetOwnerById(id);
+
+            if (owner is null)
+            {
+                return null;
+            }
+
+            owner.Name = request.Name;
+            owner.PhoneNumber = request.PhoneNumber;
+            owner.Email = request.Email;
+
+            context.SaveChanges();
+
+            return owner;
+        }
+
+        public bool DeleteOwner(int id)
+        {
+            Owner? owner = GetOwnerById(id);
+
+            if (owner is null)
+            {
+                return false;
+            }
+
+            context.Owners.Remove(owner);
+            context.SaveChanges();
+
+            return true;
+        }
+    }
+}
+
+CustomerService:
+- Next service to convert or may already be in progress.
+- It was planned to convert from List<Customer> to EF Core.
+- Should use AppDbContext.
+- Should implement ICustomerService.
+- Should remove List<Customer> and nextCustomerId.
+- Should use context.Customers.
+- Customer IDs should be generated by SQL Server.
+
+CustomerService EF Core target code:
+using CarBookingAPI.Data;
+using CarBookingAPI.DTOs;
+using CarBookingAPI.Interfaces;
+using CarBookingAPI.Models;
+
+namespace CarBookingAPI.Services
+{
+    public class CustomerService : ICustomerService
+    {
+        private readonly AppDbContext context;
+
+        public CustomerService(AppDbContext context)
+        {
+            this.context = context;
+        }
+
+        public List<Customer> GetAllCustomers()
+        {
+            return context.Customers.ToList();
+        }
+
+        public Customer? GetCustomerById(int id)
+        {
+            return context.Customers.FirstOrDefault(customer => customer.Id == id);
+        }
+
+        public Customer AddCustomer(CreateCustomerRequest request)
+        {
+            Customer customer = new Customer
+            {
+                Name = request.Name,
+                PhoneNumber = request.PhoneNumber,
+                Email = request.Email
+            };
+
+            context.Customers.Add(customer);
+            context.SaveChanges();
+
+            return customer;
+        }
+
+        public Customer? UpdateCustomer(int id, UpdateCustomerRequest request)
+        {
+            Customer? customer = GetCustomerById(id);
+
+            if (customer is null)
+            {
+                return null;
+            }
+
+            customer.Name = request.Name;
+            customer.PhoneNumber = request.PhoneNumber;
+            customer.Email = request.Email;
+
+            context.SaveChanges();
+
+            return customer;
+        }
+
+        public bool DeleteCustomer(int id)
+        {
+            Customer? customer = GetCustomerById(id);
+
+            if (customer is null)
+            {
+                return false;
+            }
+
+            context.Customers.Remove(customer);
+            context.SaveChanges();
+
+            return true;
+        }
+    }
+}
+
+TripBookingService:
+- Currently may still be in-memory List<TripBooking>.
+- Implements ITripBookingService.
+- Uses ICarService and ICustomerService through constructor.
+- CreateBooking returns TripBookingResult.
+- CancelBooking returns TripBookingResult.
+- CompleteBooking returns TripBookingResult.
+- Still needs EF Core conversion later.
+- Since CustomerService is/will be scoped, ITripBookingService registration should be AddScoped too.
+
+Trip booking rules already implemented:
+- Customer must exist.
+- Car must exist.
+- Car must be available.
+- DistanceInKm must be valid.
+- PickupLocation is required.
+- DropLocation is required.
+- TotalPrice = DistanceInKm * car.PricePerKm.
+- After booking, car IsAvailable = false.
+- Cancel booking: only active booking can be cancelled, status becomes Cancelled, car IsAvailable = true.
+- Complete booking: only active booking can be completed, status becomes Completed, car IsAvailable = true.
+- Completed booking cannot be cancelled.
+- Cancelled booking cannot be completed.
+
+Current APIs documented:
+
+Owners API:
+GET /api/owners
+GET /api/owners/{id}
+POST /api/owners
+PUT /api/owners/{id}
+DELETE /api/owners/{id}
+
+Cars API:
+GET /api/cars
+GET /api/cars/{id}
+GET /api/cars/available
+GET /api/cars/owner/{ownerId}
+POST /api/cars
+PUT /api/cars/{id}
+DELETE /api/cars/{id}
+
+Customers API:
+GET /api/customers
+GET /api/customers/{id}
+POST /api/customers
+PUT /api/customers/{id}
+DELETE /api/customers/{id}
+
+TripBookings API:
+GET /api/tripbookings
+GET /api/tripbookings/{id}
+POST /api/tripbookings
+PUT /api/tripbookings/{id}/cancel
+PUT /api/tripbookings/{id}/complete
+GET /api/tripbookings/customer/{customerId}
+GET /api/tripbookings/owner/{ownerId}
+GET /api/tripbookings/car/{carId}
+
+History endpoint behavior:
+- Invalid route ID <= 0 returns 400 Bad Request.
+- Non-existing owner/customer/car returns 404 Not Found.
+- Existing owner/customer/car with no bookings returns 200 OK [].
+- Existing owner/customer/car with bookings returns 200 OK [bookings].
+
+TripBookingResult behavior:
+- Wrong customer ID returns 400 Bad Request: Customer not found.
+- Wrong car ID returns 400 Bad Request: Car not found.
+- Booking same car twice returns 400 Bad Request: Car is not available.
+- Completing active booking returns 200 OK with updated booking status Completed.
+- Cancelling completed booking returns 400 Bad Request: Only active bookings can be cancelled.
+- Completing non-existing booking returns 404 Not Found: Booking not found.
+- Cancelling non-existing booking returns 404 Not Found: Booking not found.
+
+EF Core setup already completed:
+1. SQL Server instance verified:
+   (localdb)\MSSQLLocalDB
+2. EF Core packages installed.
+3. Data/AppDbContext.cs created.
+4. appsettings.json connection string added.
+5. Program.cs registers AppDbContext.
+6. Build successful.
+7. Migration created:
+   Add-Migration InitialCreate
+8. Database created:
+   Update-Database
+9. Database visible in SSMS:
+   CarBookingDb
+10. Tables created:
+   dbo.Owners
+   dbo.Cars
+   dbo.Customers
+   dbo.TripBookings
+   dbo.__EFMigrationsHistory
+
+AppDbContext code:
+using CarBookingAPI.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace CarBookingAPI.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Owner> Owners { get; set; }
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<TripBooking> TripBookings { get; set; }
+    }
+}
+
+appsettings.json connection string:
+"ConnectionStrings": {
+  "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=CarBookingDb;Trusted_Connection=True;TrustServerCertificate=True;"
+}
+
+Program.cs currently has/should have:
+using CarBookingAPI.Data;
+using Microsoft.EntityFrameworkCore;
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+Current DI registration status:
+- ICarService may still be AddSingleton because CarService is still in-memory.
+- IOwnerService should be AddScoped because OwnerService uses AppDbContext.
+- ICustomerService should be AddScoped once CustomerService is converted to EF Core.
+- ITripBookingService should be AddScoped once CustomerService is scoped because TripBookingService depends on ICustomerService.
+- Eventually all services should become AddScoped when converted to EF Core.
+
+Current/target Program.cs registration during EF migration:
+builder.Services.AddSingleton<ICarService, CarService>();
+builder.Services.AddScoped<IOwnerService, OwnerService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ITripBookingService, TripBookingService>();
+
+Important temporary note:
+During EF migration, some services are database-backed and some are still in-memory.
+This can make trip booking temporarily inconsistent.
+That is okay while converting step by step.
+After CarService and TripBookingService are converted to EF Core, behavior will become consistent again.
+
+What has been completed recently:
+1. DTO folder cleanup done and project runs.
+2. LocalDB verified:
+   (localdb)\MSSQLLocalDB worked.
+3. EF Core setup done.
+4. Initial migration successful.
+5. Database created successfully.
+6. OwnerService converted to EF Core.
+7. Owner saved from Swagger and verified in dbo.Owners table in SSMS.
+8. CustomerService conversion was the next task and may be in progress.
+
+Immediate next task:
+Continue EF Core service conversion.
+
+If CustomerService has NOT been converted yet:
+1. Add empty constructor to Customer model if needed:
+   public Customer() { }
+2. Convert CustomerService to use AppDbContext.
+3. Remove List<Customer> and nextCustomerId.
+4. Use context.Customers.ToList().
+5. Use context.Customers.FirstOrDefault(...).
+6. Use context.Customers.Add(customer) and context.SaveChanges().
+7. Use context.Customers.Remove(customer) and context.SaveChanges().
+8. Change Program.cs:
+   builder.Services.AddScoped<ICustomerService, CustomerService>();
+   builder.Services.AddScoped<ITripBookingService, TripBookingService>();
+9. Test POST /api/customers and GET /api/customers in Swagger.
+10. Verify dbo.Customers in SSMS.
+
+After CustomerService:
+Next convert CarService to EF Core.
+Important points for CarService conversion:
+- Add empty constructor to Car model if needed.
+- Remove List<Car> and nextCarId.
+- Use AppDbContext.
+- Use context.Cars.
+- AddCar should not set Id manually.
+- Car constructor/default should set IsAvailable = true, or AddCar should set IsAvailable = true.
+- GetCarsByOwnerId should query context.Cars.Where(car => car.OwnerId == ownerId).ToList().
+- SetCarAvailability should find car, update IsAvailable, and SaveChanges.
+- Change ICarService registration from AddSingleton to AddScoped.
+- Then all services may be AddScoped.
+
+After CarService:
+Convert TripBookingService to EF Core.
+Important points:
+- Add empty constructor to TripBooking model if needed.
+- Remove List<TripBooking> and nextBookingId.
+- Use AppDbContext directly for bookings.
+- Can still use ICarService and ICustomerService for business checks.
+- CreateBooking should:
+  - Check customer exists.
+  - Check car exists.
+  - Check car available.
+  - Calculate total price.
+  - Create TripBooking without manual Id.
+  - Add to context.TripBookings.
+  - Set car availability false.
+  - Save changes carefully.
+- CancelBooking should:
+  - Find booking in database.
+  - Check Active.
+  - Set Cancelled.
+  - Set car available true.
+  - Save changes.
+- CompleteBooking should:
+  - Find booking in database.
+  - Check Active.
+  - Set Completed.
+  - Set car available true.
+  - Save changes.
+- GetBookingsByCustomerId should query context.TripBookings.
+- GetBookingsByCarId should query context.TripBookings.
+- GetBookingsByOwnerId should:
+  - Get cars for owner from carService.GetCarsByOwnerId(ownerId).
+  - Get their IDs.
+  - Query context.TripBookings where ownerCarIds.Contains(booking.CarId).
+
+After all services are EF Core:
+- Change all DI registrations to AddScoped:
+  builder.Services.AddScoped<ICarService, CarService>();
+  builder.Services.AddScoped<IOwnerService, OwnerService>();
+  builder.Services.AddScoped<ICustomerService, CustomerService>();
+  builder.Services.AddScoped<ITripBookingService, TripBookingService>();
+- Test all APIs in Swagger.
+- Verify tables in SSMS.
+- Remove reliance on in-memory List<T>.
+- Remove all nextId fields.
+- Make sure database-generated IDs work.
+
+Later roadmap:
+
+Phase 1: Finish EF Core conversion
+- CustomerService to EF Core.
+- CarService to EF Core.
+- TripBookingService to EF Core.
+- Make all services AddScoped.
+- Test all endpoints.
+
+Phase 2: Configure relationships properly
+- Owner has many Cars.
+- Car belongs to Owner.
+- Customer has many TripBookings.
+- Car has many TripBookings.
+- TripBooking has CustomerId and CarId.
+- Add navigation properties.
+- Learn Include() to load related data.
+- Possibly add Fluent API relationship configuration in AppDbContext.
+
+Phase 3: Convert to async
+- Use Task<T>.
+- Use async/await.
+- Use ToListAsync().
+- Use FirstOrDefaultAsync().
+- Use SaveChangesAsync().
+- Update controllers and services gradually.
+
+Phase 4: Improve response models
+- Maybe create standard API response objects.
+- Return consistent JSON response shape.
+- Improve error messages further.
+- Add global error handling.
+
+Phase 5: Authentication and Authorization
+- Add user registration and login.
+- Add password hashing.
+- Add JWT token.
+- Add roles: Owner, Customer, Admin.
+- Protect endpoints with [Authorize].
+- Owner can add/update only their own cars.
+- Customer can create bookings and see their own booking history.
+- Admin can manage everything.
+
+Phase 6: Real-world trip booking features
+- Search/filter available cars.
+- Filter cars by price.
+- Trip statuses like Pending, Accepted, Started, Completed, Cancelled.
+- Owner accepts/rejects booking.
+- Customer booking history.
+- Owner earnings report.
+- Payment status.
+- Ratings/reviews.
+
+Please continue from the immediate next task:
+If CustomerService is not fully converted yet, guide me through converting CustomerService to EF Core.
+If CustomerService is already converted, continue with converting CarService to EF Core.
+Keep the teaching beginner-friendly and gradual. Review my code when I send it.
+```
+```
+
+
+
+Here is the simple overview in 10–12 points:
+
+1. **Create ASP.NET Core Web API project**  
+   Set up `CarBookingAPI` with Controllers, Models, Services, and Swagger.
+
+2. **Build Cars API**  
+   Add cars with brand, model, year, price per km, and availability.
+
+3. **Build Owners API**  
+   Owners can register themselves on the platform.
+
+4. **Connect Owners with Cars**  
+   Add `OwnerId` in `Car` so each car belongs to an owner.
+
+5. **Build Customers API**  
+   Customers can register and later book trips.
+
+6. **Build Trip Booking API**  
+   Customer selects an available car and creates a trip booking.
+
+7. **Calculate Trip Price**  
+   System calculates:  
+   `TotalPrice = DistanceInKm * PricePerKm`
+
+8. **Manage Car Availability**  
+   After booking, car becomes unavailable.  
+   After cancelling/completing trip, car becomes available again.
+
+9. **Improve Validation**  
+   Add proper validation for required fields, email, price, distance, year, etc.
+
+10. **Add Database with EF Core**  
+   Replace in-memory `List<T>` with a real database.
+
+11. **Add Authentication and Authorization**  
+   Users log in, and roles decide access: Owner, Customer, Admin.
+
+12. **Improve Architecture and Features**  
+   Add interfaces, async methods, booking history, trip status, search/filter, payments later.
+
+
+
+
+=> Also need to work on if a car driver got a booking not from our application then they will be able to remove availability for that particular day.
+
+=> OTP when the client got into the car for the ride confirmation.
+
+=> We should add the logger.
+=> we will need a actual trip date from the user.

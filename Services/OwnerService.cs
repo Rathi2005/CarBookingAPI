@@ -63,7 +63,10 @@ namespace CarBookingAPI.Services
             {
                 return false;
             }
-            
+
+            bool hasCars = context.Cars.Any(c => c.OwnerId == id);
+            if (hasCars) return false;
+
             context.Owners.Remove(o);
             context.SaveChanges();
 

@@ -3,6 +3,7 @@ using CarBookingAPI.DTOs;
 using CarBookingAPI.Interfaces;
 using CarBookingAPI.Models;
 using CarBookingAPI.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarBookingAPI.Services
 {
@@ -22,12 +23,12 @@ namespace CarBookingAPI.Services
 
         public List<TripBooking> GetAllBookings()
         {
-            return context.TripBookings.ToList();
+            return context.TripBookings.Include(booking => booking.Customer).Include(booking => booking.Car).ToList();
         }
 
         public TripBooking? GetBookingById(int id)
         {
-            return context.TripBookings.FirstOrDefault(booking => booking.Id == id);
+            return context.TripBookings.Include(booking => booking.Customer).Include(booking => booking.Car).FirstOrDefault(booking => booking.Id == id);
         }
 
         public TripBookingResult CreateBooking(CreateTripBookingRequest request)

@@ -4,16 +4,25 @@ using CarBookingAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 // swagger
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// the below functionality helps to ignore the cyclic behaviour of .Include() causing infinite loop
+// eg:- car.Owner => car has owner, owner has cars, then again car has owner and so on.
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler =
+    ReferenceHandler.IgnoreCycles;
+});
 
 builder.Services.AddScoped<ICarService ,CarService>(); // dependency injection registration
 builder.Services.AddScoped<IOwnerService ,OwnerService>();

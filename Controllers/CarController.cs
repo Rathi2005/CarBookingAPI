@@ -13,11 +13,13 @@ namespace CarBookingAPI.Controllers
     {
         private readonly ICarService carService;
         private readonly IOwnerService ownerService;
+        private readonly ITripBookingService tripBookingService;
 
-        public CarController(ICarService carService, IOwnerService ownerService) // This constructor is used to Dependency Injection.
+        public CarController(ICarService carService, IOwnerService ownerService, ITripBookingService tripBookingService) // This constructor is used to Dependency Injection.
         {
             this.carService = carService;
             this.ownerService = ownerService;
+            this.tripBookingService = tripBookingService;
         }
 
         [HttpGet]
@@ -70,13 +72,28 @@ namespace CarBookingAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<bool> DeleteCar([FromRoute] int id)
         {
-            bool ans = carService.DeleteCar(id);
-            if (!ans)
+            if (id <= 0)
+            {
+                return BadRequest("Invalid car ID.");
+            }
+
+            List<TripBooking> trips =
+                tripBookingService.GetBookingsByCarId(id);
+
+            if (trips.Any())
+            {
+                return BadRequest(
+                    "Cars having trips cannot be deleted.");
+            }
+
+            bool deleted = carService.DeleteCar(id);
+
+            if (!deleted)
             {
                 return NotFound("Car not found.");
             }
-            // Ok- Status Code is 200 
-            return Ok(ans);
+
+            return Ok("Car deleted successfully.");
         }
 
         // UpdateCar

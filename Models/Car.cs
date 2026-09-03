@@ -10,6 +10,8 @@
         public bool IsAvailable { get; set; }
         public int OwnerId { get; set; }
 
+        public Owner Owner { get; set; } = null!;
+        public List<TripBooking> TripBookings { get; set; } = new List<TripBooking>();
         public Car()
         {
 

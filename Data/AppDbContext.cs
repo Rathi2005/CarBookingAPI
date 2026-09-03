@@ -9,6 +9,29 @@ namespace CarBookingAPI.Data
             : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Car>()
+                .HasOne(car => car.Owner)
+                .WithMany(owner => owner.Cars)
+                .HasForeignKey(car => car.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TripBooking>()
+                .HasOne(booking => booking.Customer)
+                .WithMany(customer => customer.TripBookings)
+                .HasForeignKey(booking => booking.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TripBooking>()
+                .HasOne(booking => booking.Car)
+                .WithMany(car => car.TripBookings)
+                .HasForeignKey(booking => booking.CarId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
         public DbSet<Owner> Owners { get; set;  }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Car> Cars { get; set; }

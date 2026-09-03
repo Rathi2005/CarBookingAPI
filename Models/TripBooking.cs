@@ -12,6 +12,11 @@
         public DateTime BookingDate { get; set; }
         public string Status { get; set; }
 
+        // these below fields tells that the tripbooking has a car and a customer 
+        // we will define the relationship in the AppDbContext file.
+        public Customer Customer { get; set; } = null!;
+        public Car Car { get; set; } = null!;
+
         public TripBooking()
         {
 

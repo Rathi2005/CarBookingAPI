@@ -11,10 +11,12 @@ namespace CarBookingAPI.Controllers
     public class OwnerController : ControllerBase
     {
         private readonly IOwnerService ownerService;
+        private readonly ICarService carService;
 
-        public OwnerController(IOwnerService ownerService)
+        public OwnerController(IOwnerService ownerService, ICarService carService)
         {
             this.ownerService = ownerService;
+            this.carService = carService;
         }
 
         [HttpGet]
@@ -82,10 +84,15 @@ namespace CarBookingAPI.Controllers
             if (id <= 0)
                 return BadRequest();
 
-            bool o = ownerService.DeleteOwner(id);
+            List<Car> ownersCar = carService.GetCarsByOwnerId(id);
 
+            if (ownersCar.Any())
+                return BadRequest("Owner cannot be deleted because they have registered cars.");
+
+            bool o = ownerService.DeleteOwner(id);
             if (!o)
                 return NotFound("Owner not found.");
+
 
             return Ok(o);
         }

@@ -9,6 +9,7 @@ namespace CarBookingAPI.Models
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
 
+        public List<Car> Cars { get; set; } = new List<Car>();
         public Owner()
         {
             // why this constructor?

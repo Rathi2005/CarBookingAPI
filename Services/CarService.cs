@@ -2,6 +2,7 @@
 using CarBookingAPI.DTOs;
 using CarBookingAPI.Interfaces;
 using CarBookingAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarBookingAPI.Services
 {
@@ -16,12 +17,13 @@ namespace CarBookingAPI.Services
 
         public List<Car> GetAllCars()
         {
-            return context.Cars.ToList();
+            return context.Cars.Include(car => car.Owner).ToList();   // this include willadd the related table data also
+                                                                      // like the owners data in this case.
         }
 
         public Car? GetCarById(int id)
         {
-            return context.Cars.FirstOrDefault(car => car.Id == id);
+            return context.Cars.Include(c => c.Owner).FirstOrDefault(car => car.Id == id);
         }
 
         public Car AddCar(CreateCarRequest request)
@@ -71,6 +73,9 @@ namespace CarBookingAPI.Services
                 return false;
             }
 
+            bool hasTrip = context.TripBookings.Any(t => t.CarId == id);
+            if(hasTrip ) return false;
+
             context.Cars.Remove(car);
             context.SaveChanges();
 
@@ -81,6 +86,7 @@ namespace CarBookingAPI.Services
         {
             return context.Cars
                 .Where(car => car.IsAvailable)
+                .Include(car => car.Owner)
                 .ToList();
         }
 
@@ -88,6 +94,7 @@ namespace CarBookingAPI.Services
         {
             return context.Cars
                 .Where(car => car.OwnerId == ownerId)
+                .Include(car => car.Owner)
                 .ToList();
         }
 

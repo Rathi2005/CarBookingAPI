@@ -11,10 +11,12 @@ namespace CarBookingAPI.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerService customerService;
+        private readonly ITripBookingService tripBookingService;
 
-        public CustomersController(ICustomerService customerService)
+        public CustomersController(ICustomerService customerService, ITripBookingService tripBookingService)
         {
             this.customerService = customerService;
+            this.tripBookingService = tripBookingService;
         }
 
         [HttpGet]
@@ -89,6 +91,11 @@ namespace CarBookingAPI.Controllers
             {
                 return BadRequest("Invalid customer ID.");
             }
+
+            List<TripBooking> trips = tripBookingService.GetBookingsByCustomerId(id);
+
+            if (trips.Any())
+                return BadRequest("Customers with trips cannot be deleted.");
 
             bool deleted = customerService.DeleteCustomer(id);
 

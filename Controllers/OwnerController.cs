@@ -1,8 +1,10 @@
-﻿using CarBookingAPI.Services;
+﻿using CarBookingAPI.DTOs;
 using CarBookingAPI.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using CarBookingAPI.Models;
-using CarBookingAPI.DTOs;
+using CarBookingAPI.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CarBookingAPI.Controllers
 {
@@ -12,11 +14,13 @@ namespace CarBookingAPI.Controllers
     {
         private readonly IOwnerService ownerService;
         private readonly ICarService carService;
+        private readonly ITripBookingService tripBookingService;
 
-        public OwnerController(IOwnerService ownerService, ICarService carService)
+        public OwnerController(IOwnerService ownerService, ICarService carService, ITripBookingService tripBookingService)
         {
             this.ownerService = ownerService;
             this.carService = carService;
+            this.tripBookingService = tripBookingService;
         }
 
         [HttpGet]
@@ -48,7 +52,6 @@ namespace CarBookingAPI.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-
         public ActionResult<Owner> AddOwner(CreateOwnerRequest request)
         {
             Owner o = ownerService.AddOwner(request);
@@ -95,6 +98,64 @@ namespace CarBookingAPI.Controllers
 
 
             return Ok(o);
+        }
+
+        [Authorize]
+        [HttpGet("me/trips")]
+        public ActionResult<List<TripBookingResponse>> GetMyTrips()
+        {
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            List<TripBookingResponse> trips = tripBookingService.GetOwnersBooking(ownerId);
+
+            return Ok(trips);
+        }
+
+        [Authorize]
+        [HttpGet("me/reports/daily")]
+        public ActionResult<OwnerDailyReportResponse> GetMyDailyReport([FromQuery] DateTime date)
+        {
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            if (date == default)
+            {
+                return BadRequest("Date is required.");
+            }
+
+            OwnerDailyReportResponse report = tripBookingService.GetDailyReportByOwnerId(ownerId, date);
+
+            return Ok(report);
+        }
+
+        [Authorize]
+        [HttpGet("me/trips/monthly")]
+        public ActionResult<OwnerMonthlyReportResponse> GetMyMonthlyReport([FromQuery] int year, [FromQuery] int month)
+        {
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            if (year <= 0 || month < 1 || month > 12)
+            {
+                return BadRequest("Valid year and month are required.");
+            }
+
+            OwnerMonthlyReportResponse report = tripBookingService.GetMonthlyReportByOwnerId(ownerId, year, month);
+
+            return Ok(report);
         }
     } 
 }

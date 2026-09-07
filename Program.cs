@@ -1,20 +1,14 @@
 using CarBookingAPI.Data;
 using CarBookingAPI.Interfaces;
 using CarBookingAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Scalar.AspNetCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-// swagger
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 
 // the below functionality helps to ignore the cyclic behaviour of .Include() causing infinite loop
 // eg:- car.Owner => car has owner, owner has cars, then again car has owner and so on.
@@ -24,6 +18,54 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     ReferenceHandler.IgnoreCycles;
 });
 
+builder.Services.AddEndpointsApiExplorer();
+// Add services to the container.
+
+// swagger
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "CarBookingAPI",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter: Bearer {your JWT token}"
+    });
+
+    // RESOLVED: Correct indexer assignment syntax for Swashbuckle 10.x
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+    });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICarService ,CarService>(); // dependency injection registration
 builder.Services.AddScoped<IOwnerService ,OwnerService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -40,19 +82,14 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(); // Adds a modern browser UI
-
-    // 2. This points Swagger UI to look at that exact JSON endpoint
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "v1");
-    });
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();// This activates the Routing Engine. It tells the engine to look at the [Route] and

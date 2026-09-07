@@ -26,32 +26,45 @@ namespace CarBookingAPI.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<List<TripBooking>> GetAllBookings()
+        public ActionResult<List<TripBookingResponse>> GetAllBookings()
         {
-            List<TripBooking> bookings = tripBookingService.GetAllBookings();
+            List<TripBookingResponse> bookings = tripBookingService.GetAllBookingResponses();
+            ApiResponse<List<TripBookingResponse>> response = new ApiResponse<List<TripBookingResponse>>
+            {
+                Success = true,
+                Message = "Bookings fetched successfully.",
+                Data = bookings
+            };
 
-            return Ok(bookings);
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<TripBooking> GetBookingById([FromRoute] int id)
+        public ActionResult<TripBookingResponse> GetBookingById([FromRoute] int id)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid booking ID.");
             }
 
-            TripBooking? booking = tripBookingService.GetBookingById(id);
+            TripBookingResponse? booking = tripBookingService.GetBookingResponseById(id);
 
             if (booking is null)
             {
                 return NotFound("Booking not found.");
             }
 
-            return Ok(booking);
+            ApiResponse<TripBookingResponse> response = new ApiResponse<TripBookingResponse>
+            {
+                Success = true,
+                Message = "Booking fetched successfully.",
+                Data = booking
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
@@ -122,7 +135,7 @@ namespace CarBookingAPI.Controllers
         [HttpGet("customer/{customerId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<List<TripBooking>> GetBookingsByCustomerId([FromRoute] int customerId)
+        public ActionResult<List<TripBookingResponse>> GetBookingsByCustomerId([FromRoute] int customerId)
         {
             if (customerId <= 0)
             {
@@ -136,7 +149,7 @@ namespace CarBookingAPI.Controllers
                 return NotFound("Customer not found.");
             }
 
-            List<TripBooking> bookings = tripBookingService.GetBookingsByCustomerId(customerId);
+            List<TripBookingResponse> bookings = tripBookingService.GetBookingsByCustomerId(customerId);
 
             return Ok(bookings);
         }
@@ -144,7 +157,7 @@ namespace CarBookingAPI.Controllers
         [HttpGet("car/{carId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<List<TripBooking>> GetBookingsByCarId([FromRoute] int carId)
+        public ActionResult<List<TripBookingResponse>> GetBookingsByCarId([FromRoute] int carId)
         {
             if (carId <= 0)
             {
@@ -158,7 +171,7 @@ namespace CarBookingAPI.Controllers
                 return NotFound("Car not found.");
             }
 
-            List<TripBooking> bookings = tripBookingService.GetBookingsByCarId(carId);
+            List<TripBookingResponse> bookings = tripBookingService.GetBookingsByCarId(carId);
 
             return Ok(bookings);
         }

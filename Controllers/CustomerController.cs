@@ -92,7 +92,7 @@ namespace CarBookingAPI.Controllers
                 return BadRequest("Invalid customer ID.");
             }
 
-            List<TripBooking> trips = tripBookingService.GetBookingsByCustomerId(id);
+            List<TripBookingResponse> trips = tripBookingService.GetBookingsByCustomerId(id);
 
             if (trips.Any())
                 return BadRequest("Customers with trips cannot be deleted.");

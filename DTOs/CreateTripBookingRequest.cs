@@ -19,6 +19,6 @@ namespace CarBookingAPI.DTOs
         public string DropLocation { get; set; } = string.Empty;
 
         [Range(1, 10000, ErrorMessage = "Distance must be between 1 and 10000 km.")]
-        public decimal DistanceInKm { get; set; }
+        public double DistanceInKm { get; set; }
     }
 }

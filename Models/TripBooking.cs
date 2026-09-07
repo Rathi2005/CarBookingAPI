@@ -7,8 +7,8 @@
         public int CarId { get; set; }
         public string PickupLocation { get; set; }
         public string DropLocation { get; set; }
-        public decimal DistanceInKm { get; set; }
-        public decimal TotalPrice { get; set; }
+        public double DistanceInKm { get; set; }
+        public double TotalPrice { get; set; }
         public DateTime BookingDate { get; set; }
         public string Status { get; set; }
 
@@ -27,8 +27,8 @@
             int carId,
             string pickupLocation,
             string dropLocation,
-            decimal distanceInKm,
-            decimal totalPrice)
+            double distanceInKm,
+            double totalPrice)
         {
             Id = id;
             CustomerId = customerId;

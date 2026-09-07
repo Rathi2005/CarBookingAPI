@@ -6,7 +6,7 @@
         public string Brand { get; set; }
         public string Model { get; set; }
         public int Year { get; set; }
-        public decimal PricePerKm { get; set; }
+        public double PricePerKm { get; set; }
         public bool IsAvailable { get; set; }
         public int OwnerId { get; set; }
 
@@ -16,7 +16,7 @@
         {
 
         }
-        public Car(int id, int ownerId, string brand, string model, int year, decimal pricePerKm)
+        public Car(int id, int ownerId, string brand, string model, int year, double pricePerKm)
         {
             Id = id;
             OwnerId = ownerId;

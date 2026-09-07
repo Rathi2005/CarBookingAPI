@@ -17,69 +17,16 @@ namespace CarBookingAPI.Services
 
         public List<Car> GetAllCars()
         {
-            return context.Cars.Include(car => car.Owner).ToList();   // this include willadd the related table data also
-                                                                      // like the owners data in this case.
+            return context.Cars
+                .Include(car => car.Owner)
+                .ToList();
         }
 
         public Car? GetCarById(int id)
         {
-            return context.Cars.Include(c => c.Owner).FirstOrDefault(car => car.Id == id);
-        }
-
-        public Car AddCar(CreateCarRequest request)
-        {
-            Car car = new Car
-            {
-                OwnerId = request.OwnerId,
-                Brand = request.Brand,
-                Model = request.Model,
-                Year = request.Year,
-                PricePerKm = request.PricePerKm,
-                IsAvailable = true
-            };
-
-            context.Cars.Add(car);
-            context.SaveChanges();
-
-            return car;
-        }
-
-        public Car? UpdateCar(int id, UpdateCarRequest request)
-        {
-            Car? car = GetCarById(id);
-
-            if (car is null)
-            {
-                return null;
-            }
-
-            car.OwnerId = request.OwnerId;
-            car.Brand = request.Brand;
-            car.Model = request.Model;
-            car.Year = request.Year;
-            car.PricePerKm = request.PricePerKm;
-
-            context.SaveChanges();
-
-            return car;
-        }
-
-        public bool DeleteCar(int id)
-        {
-            Car? car = GetCarById(id);
-
-            if (car is null)
-            {
-                return false;
-            }
-
-            bool hasTrip = context.TripBookings.Any(t => t.CarId == id);
-            if(hasTrip ) return false;
-
-            context.Cars.Remove(car);
-            context.SaveChanges();
-
-            return true;
+            return context.Cars
+                .Include(car => car.Owner)
+                .FirstOrDefault(car => car.Id == id);
         }
 
         public List<Car> GetAvailableCars()
@@ -98,9 +45,69 @@ namespace CarBookingAPI.Services
                 .ToList();
         }
 
+        public Car AddCar(int ownerId, CreateCarRequest request)
+        {
+            Car car = new Car
+            {
+                OwnerId = ownerId,
+                Brand = request.Brand,
+                Model = request.Model,
+                Year = request.Year,
+                PricePerKm = request.PricePerKm,
+                IsAvailable = true
+            };
+
+            context.Cars.Add(car);
+            context.SaveChanges();
+
+            return car;
+        }
+
+        public Car? UpdateCar(int id, int ownerId, UpdateCarRequest request)
+        {
+            Car? car = context.Cars
+                .FirstOrDefault(car => car.Id == id && car.OwnerId == ownerId);
+
+            if (car is null)
+            {
+                return null;
+            }
+
+            car.Brand = request.Brand;
+            car.Model = request.Model;
+            car.Year = request.Year;
+            car.PricePerKm = request.PricePerKm;
+
+            context.SaveChanges();
+
+            return car;
+        }
+
+        public bool DeleteCar(int id, int ownerId)
+        {
+            Car? car = context.Cars
+                .FirstOrDefault(car => car.Id == id && car.OwnerId == ownerId);
+
+            if (car is null)
+            {
+                return false;
+            }
+
+            bool hasTrip = context.TripBookings.Any(t => t.CarId == id);
+            if (hasTrip)
+            {
+                return false;
+            }
+
+            context.Cars.Remove(car);
+            context.SaveChanges();
+
+            return true;
+        }
+
         public bool SetCarAvailability(int carId, bool isAvailable)
         {
-            Car? car = GetCarById(carId);
+            Car? car = context.Cars.FirstOrDefault(car => car.Id == carId);
 
             if (car is null)
             {

@@ -7,7 +7,7 @@
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
 
-        public List<TripBooking> TripBookings { get; set; } = new List<TripBooking>();
+        public List<TripBooking> TripBookings { get; set; } = new List<TripBooking>();  // tese are navigation property 
 
         public Customer()
         {

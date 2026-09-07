@@ -1,92 +1,140 @@
 ﻿using CarBookingAPI.DTOs;
 using CarBookingAPI.Interfaces;
 using CarBookingAPI.Models;
-using CarBookingAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CarBookingAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CarController : ControllerBase
+    public class CarsController : ControllerBase
     {
         private readonly ICarService carService;
-        private readonly IOwnerService ownerService;
         private readonly ITripBookingService tripBookingService;
 
-        public CarController(ICarService carService, IOwnerService ownerService, ITripBookingService tripBookingService) // This constructor is used to Dependency Injection.
+        public CarsController(ICarService carService, ITripBookingService tripBookingService)
         {
             this.carService = carService;
-            this.ownerService = ownerService;
             this.tripBookingService = tripBookingService;
         }
 
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]  // this is used for documenting the api status code and their types
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<Car>> GetAllCars() // Here ActionResult is used so that we can give status code aswell
-                                                    // with the responses.
+        [Authorize(Roles = "Owner")]
+        [HttpGet("me")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Car>))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<List<Car>> GetMyCars()
         {
-            List<Car> c = carService.GetAllCars();
-            return c;
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            List<Car> cars = carService.GetCarsByOwnerId(ownerId);
+            return Ok(cars);
         }
 
         [HttpGet("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]  
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        // the above can also be written as => [HttpGet] [Route("{id}", Name = "GetCarById")]
-        public ActionResult<Car> GetCarById([FromRoute] int id) {
-            Car? car = carService.GetCarById(id);
-            if (id < 0)
-                return BadRequest();
-            if(car is null)
+        public ActionResult<Car> GetCarById([FromRoute] int id)
+        {
+            if (id <= 0)
             {
-                return NotFound("Car not Found.");
+                return BadRequest("Invalid car id.");
+            }
+
+            Car? car = carService.GetCarById(id);
+
+            if (car is null)
+            {
+                return NotFound("Car not found.");
             }
 
             return Ok(car);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))] 
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Car> AddCar(CreateCarRequest request){
-            Owner? owner = ownerService.GetOwnerById(request.OwnerId);
-           
-            if (owner is null)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Car))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<Car> AddCar([FromBody] CreateCarRequest request)
+        {
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
             {
-                return BadRequest("Owner not found.");
+                return Unauthorized("Invalid token.");
             }
-            Car car = carService.AddCar(request);
+
+            Car car = carService.AddCar(ownerId, request);
 
             return CreatedAtAction(nameof(GetCarById), new { id = car.Id }, car);
         }
 
-        [HttpDelete("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]  
+        [Authorize(Roles = "Owner")]
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<bool> DeleteCar([FromRoute] int id)
+        public ActionResult<Car> UpdateCar([FromRoute] int id, [FromBody] UpdateCarRequest request)
         {
             if (id <= 0)
             {
-                return BadRequest("Invalid car ID.");
+                return BadRequest("Invalid car id.");
             }
 
-            List<TripBooking> trips =
-                tripBookingService.GetBookingsByCarId(id);
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            Car? updated = carService.UpdateCar(id, ownerId, request);
+
+            if (updated is null)
+            {
+                return NotFound("Car not found.");
+            }
+
+            return Ok(updated);
+        }
+
+        [Authorize(Roles = "Owner")]
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult DeleteCar([FromRoute] int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid car id.");
+            }
+
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            List<TripBookingResponse> trips = tripBookingService.GetBookingsByCarId(id);
 
             if (trips.Any())
             {
-                return BadRequest(
-                    "Cars having trips cannot be deleted.");
+                return BadRequest("Cars having trips cannot be deleted.");
             }
 
-            bool deleted = carService.DeleteCar(id);
+            bool deleted = carService.DeleteCar(id, ownerId);
 
             if (!deleted)
             {
@@ -96,54 +144,12 @@ namespace CarBookingAPI.Controllers
             return Ok("Car deleted successfully.");
         }
 
-        // UpdateCar
-        [HttpPut("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Car> UpdateCar([FromRoute] int id, UpdateCarRequest request)
-        {
-            if (id < 0)
-                return BadRequest();
-
-            Car c = carService.UpdateCar(id, request);
-            if(c is null)
-            {
-                return NotFound("Car not found");
-            }
-            return Ok(c);
-        }
-
         [HttpGet("available")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<List<Car>> GetAvailableCars()
         {
             List<Car> availableCars = carService.GetAvailableCars();
-
             return Ok(availableCars);
-        }
-
-        [HttpGet("owner/{ownerId:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<Car>> GetCarsByOwnerId([FromRoute] int ownerId)
-        {
-            if (ownerId <= 0)
-                return BadRequest();
-
-            Owner? o = ownerService.GetOwnerById(ownerId);
-            if(o is null)
-            {
-                return NotFound("Owner not found.");
-            }
-
-            return Ok(carService.GetCarsByOwnerId(ownerId));
         }
     }
 }
-
-// BadRequest() - Status Code 400, client error
-// NotFound() - Status Code 404

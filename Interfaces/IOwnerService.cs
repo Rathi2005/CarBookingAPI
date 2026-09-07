@@ -9,6 +9,6 @@ namespace CarBookingAPI.Interfaces
         public Owner GetOwnerById(int id);
         public Owner AddOwner(CreateOwnerRequest request);
         public Owner UpdateOwner(int id, UpdateOwnerRequest request);
-        public bool DeleteOwner(int id); 
+        public bool DeleteOwner(int id);
     }
 }

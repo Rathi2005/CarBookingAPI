@@ -119,5 +119,14 @@ namespace CarBookingAPI.Services
 
             return true;
         }
+
+        public List<Car> GetAvailableCarsByOwnerId(int ownerId)
+        {
+            return context.Cars
+                .Where(car => car.OwnerId == ownerId && car.IsAvailable)
+                .Include(car => car.Owner)
+                .ToList();
+        }
+
     }
 }

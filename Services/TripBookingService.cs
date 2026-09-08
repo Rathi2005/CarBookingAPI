@@ -2,7 +2,6 @@
 using CarBookingAPI.DTOs;
 using CarBookingAPI.Interfaces;
 using CarBookingAPI.Models;
-using CarBookingAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarBookingAPI.Services
@@ -11,7 +10,6 @@ namespace CarBookingAPI.Services
     {
         private readonly ICarService carService;
         private readonly ICustomerService customerService;
-
         private readonly AppDbContext context;
 
         public TripBookingService(ICarService carService, ICustomerService customerService, AppDbContext context)
@@ -44,7 +42,7 @@ namespace CarBookingAPI.Services
             return context.TripBookings
                 .Include(booking => booking.Customer)
                 .Include(booking => booking.Car)
-                .ThenInclude(car => car.Owner)   // this will include the owner as well
+                .ThenInclude(car => car.Owner)
                 .ToList();
         }
 
@@ -59,37 +57,48 @@ namespace CarBookingAPI.Services
             return bookings.Select(MapToResponse).ToList();
         }
 
-        public TripBookingResponse GetBookingResponseById(int id)
+        public TripBookingResponse? GetBookingResponseById(int id)
         {
-            TripBooking? trip =  context.TripBookings
+            TripBooking? trip = context.TripBookings
                 .Include(booking => booking.Customer)
                 .Include(booking => booking.Car)
-                .ThenInclude(car => car.Owner).FirstOrDefault(booking => booking.Id == id);
+                .ThenInclude(car => car.Owner)
+                .FirstOrDefault(booking => booking.Id == id);
 
-            if (trip is null) return null;
+            if (trip is null)
+            {
+                return null;
+            }
 
             return MapToResponse(trip);
         }
 
         public TripBooking? GetBookingById(int id)
         {
-            return context.TripBookings.Include(booking => booking.Customer).Include(booking => booking.Car).FirstOrDefault(booking => booking.Id == id);
+            return context.TripBookings
+                .Include(booking => booking.Customer)
+                .Include(booking => booking.Car)
+                .ThenInclude(car => car.Owner)
+                .FirstOrDefault(booking => booking.Id == id);
         }
 
-        public TripBookingResult CreateBooking(CreateTripBookingRequest request)
+        public TripBookingResult CreateBooking(int ownerId, CreateTripBookingRequest request)
         {
-            Customer? customer = customerService.GetCustomerById(request.CustomerId);
-
+            Customer? customer = context.Customers.FirstOrDefault(c => c.Id == request.CustomerId);
             if (customer is null)
             {
                 return TripBookingResult.Fail("Customer not found.");
             }
 
-            Car? car = carService.GetCarById(request.CarId);
-
+            Car? car = context.Cars.FirstOrDefault(c => c.Id == request.CarId);
             if (car is null)
             {
                 return TripBookingResult.Fail("Car not found.");
+            }
+
+            if (car.OwnerId != ownerId)
+            {
+                return TripBookingResult.Fail("You can create bookings only for your own cars.");
             }
 
             if (!car.IsAvailable)
@@ -99,10 +108,8 @@ namespace CarBookingAPI.Services
 
             if (request.DistanceInKm <= 0)
             {
-                return TripBookingResult.Fail("Distance must be greater than 0.");
+                return TripBookingResult.Fail("Distance must be greater than zero.");
             }
-
-            double totalPrice = request.DistanceInKm * car.PricePerKm;
 
             TripBooking booking = new TripBooking
             {
@@ -111,47 +118,61 @@ namespace CarBookingAPI.Services
                 PickupLocation = request.PickupLocation,
                 DropLocation = request.DropLocation,
                 DistanceInKm = request.DistanceInKm,
-                TotalPrice = totalPrice,
+                TotalPrice = request.DistanceInKm * car.PricePerKm,
                 BookingDate = DateTime.Now,
                 Status = TripBookingStatus.Active
             };
 
             context.TripBookings.Add(booking);
-
             car.IsAvailable = false;
-
             context.SaveChanges();
+
+            context.Entry(booking).Reference(b => b.Customer).Load();
+            context.Entry(booking).Reference(b => b.Car).Load();
+            context.Entry(booking).Reference(b => b.Car!).Query().Include(c => c.Owner).Load();
 
             return TripBookingResult.Ok("Booking created successfully.", booking);
         }
 
-        public TripBookingResult CancelBooking(int id)
+        public TripBookingResult CancelBooking(int id, int ownerId)
         {
             TripBooking? booking = GetBookingById(id);
 
             if (booking is null)
             {
-                return TripBookingResult.Fail("Booking not found");
+                return TripBookingResult.Fail("Booking not found.");
+            }
+
+            if (booking.Car is null || booking.Car.OwnerId != ownerId)
+            {
+                return TripBookingResult.Fail("Booking not found.");
             }
 
             if (booking.Status != TripBookingStatus.Active)
             {
-                return TripBookingResult.Fail("Booking Already Closed");
+                return TripBookingResult.Fail("Only active bookings can be cancelled.");
             }
 
             booking.Status = TripBookingStatus.Cancelled;
+            booking.Car.IsAvailable = true;
 
-            carService.SetCarAvailability(booking.CarId, true);
-            return TripBookingResult.Ok("Booking successfully Cancelled", booking);
+            context.SaveChanges();
+
+            return TripBookingResult.Ok("Booking successfully cancelled.", booking);
         }
 
-        public TripBookingResult CompleteBooking(int id)
+        public TripBookingResult CompleteBooking(int id, int ownerId)
         {
             TripBooking? booking = GetBookingById(id);
 
             if (booking is null)
             {
-                return TripBookingResult.Fail("Booking not found");
+                return TripBookingResult.Fail("Booking not found.");
+            }
+
+            if (booking.Car is null || booking.Car.OwnerId != ownerId)
+            {
+                return TripBookingResult.Fail("Booking not found.");
             }
 
             if (booking.Status != TripBookingStatus.Active)
@@ -160,17 +181,18 @@ namespace CarBookingAPI.Services
             }
 
             booking.Status = TripBookingStatus.Completed;
+            booking.Car.IsAvailable = true;
 
-            carService.SetCarAvailability(booking.CarId, true);
+            context.SaveChanges();
+
             return TripBookingResult.Ok("Booking completed successfully.", booking);
         }
 
-
-        // Customers Trip History
         public List<TripBookingResponse> GetBookingsByCustomerId(int customerId)
         {
             List<TripBooking> bookings = context.TripBookings
                 .Where(booking => booking.CustomerId == customerId)
+                .Include(booking => booking.Customer)
                 .Include(booking => booking.Car)
                 .ThenInclude(car => car.Owner)
                 .ToList();
@@ -178,11 +200,11 @@ namespace CarBookingAPI.Services
             return bookings.Select(MapToResponse).ToList();
         }
 
-        // Trips Histroy Per Car
         public List<TripBookingResponse> GetBookingsByCarId(int carId)
         {
             List<TripBooking> bookings = context.TripBookings
                 .Where(booking => booking.CarId == carId)
+                .Include(booking => booking.Customer)
                 .Include(booking => booking.Car)
                 .ThenInclude(car => car.Owner)
                 .ToList();
@@ -190,14 +212,14 @@ namespace CarBookingAPI.Services
             return bookings.Select(MapToResponse).ToList();
         }
 
-        // Owners Trip History
-        public List<TripBookingResponse> GetOwnersBooking(int ownerId) {
+        public List<TripBookingResponse> GetOwnersBooking(int ownerId)
+        {
             List<Car> ownerCars = carService.GetCarsByOwnerId(ownerId);
-
             List<int> carIds = ownerCars.Select(c => c.Id).ToList();
 
             List<TripBooking> ownerBookings = context.TripBookings
                 .Where(trip => carIds.Contains(trip.CarId))
+                .Include(booking => booking.Customer)
                 .Include(booking => booking.Car)
                 .ThenInclude(car => car.Owner)
                 .ToList();
@@ -208,8 +230,8 @@ namespace CarBookingAPI.Services
         public OwnerDailyReportResponse GetDailyReportByOwnerId(int ownerId, DateTime date)
         {
             List<TripBookingResponse> trips = GetOwnersBooking(ownerId)
-              .Where(trip => trip.BookingDate.Date == date.Date)
-               .ToList();
+                .Where(trip => trip.BookingDate.Date == date.Date)
+                .ToList();
 
             return new OwnerDailyReportResponse
             {
@@ -218,8 +240,9 @@ namespace CarBookingAPI.Services
                 TotalTrips = trips.Count,
                 CompletedTrips = trips.Count(trip => trip.Status == TripBookingStatus.Completed),
                 CancelledTrips = trips.Count(trip => trip.Status == TripBookingStatus.Cancelled),
-                TotalEarnings = (double)trips.Where(trip => trip.Status == TripBookingStatus.Completed)
-                                .Sum(trip => trip.TotalPrice),
+                TotalEarnings = (double)trips
+                    .Where(trip => trip.Status == TripBookingStatus.Completed)
+                    .Sum(trip => trip.TotalPrice),
                 Trips = trips
             };
         }
@@ -245,6 +268,25 @@ namespace CarBookingAPI.Services
             };
         }
 
+        public OwnerDashboardResponse GetDashboardByOwnerId(int ownerId)
+        {
+            List<Car> ownerCars = carService.GetCarsByOwnerId(ownerId);
+            List<TripBookingResponse> trips = GetOwnersBooking(ownerId);
+
+            return new OwnerDashboardResponse
+            {
+                OwnerId = ownerId,
+                TotalCars = ownerCars.Count,
+                AvailableCars = ownerCars.Count(car => car.IsAvailable),
+                TotalTrips = trips.Count,
+                ActiveTrips = trips.Count(trip => trip.Status == TripBookingStatus.Active),
+                CompletedTrips = trips.Count(trip => trip.Status == TripBookingStatus.Completed),
+                CancelledTrips = trips.Count(trip => trip.Status == TripBookingStatus.Cancelled),
+                TotalEarnings = (double)trips
+                    .Where(trip => trip.Status == TripBookingStatus.Completed)
+                    .Sum(trip => trip.TotalPrice)
+            };
+        }
 
     }
 }

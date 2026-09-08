@@ -1,9 +1,9 @@
 ﻿using CarBookingAPI.DTOs;
 using CarBookingAPI.Interfaces;
 using CarBookingAPI.Models;
-using CarBookingAPI.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CarBookingAPI.Controllers
 {
@@ -16,7 +16,11 @@ namespace CarBookingAPI.Controllers
         private readonly ICarService carService;
         private readonly ICustomerService customerService;
 
-        public TripBookingsController(ITripBookingService tripBookingService, IOwnerService ownerService, ICarService carService, ICustomerService customerService)
+        public TripBookingsController(
+            ITripBookingService tripBookingService,
+            IOwnerService ownerService,
+            ICarService carService,
+            ICustomerService customerService)
         {
             this.tripBookingService = tripBookingService;
             this.ownerService = ownerService;
@@ -24,11 +28,14 @@ namespace CarBookingAPI.Controllers
             this.customerService = customerService;
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<List<TripBookingResponse>> GetAllBookings()
         {
             List<TripBookingResponse> bookings = tripBookingService.GetAllBookingResponses();
+
             ApiResponse<List<TripBookingResponse>> response = new ApiResponse<List<TripBookingResponse>>
             {
                 Success = true,
@@ -39,10 +46,12 @@ namespace CarBookingAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<TripBookingResponse> GetBookingById([FromRoute] int id)
         {
             if (id <= 0)
@@ -67,23 +76,36 @@ namespace CarBookingAPI.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<TripBookingResult> CreateBooking([FromBody] CreateTripBookingRequest request)
         {
-            TripBookingResult result = tripBookingService.CreateBooking(request);
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            TripBookingResult result = tripBookingService.CreateBooking(ownerId, request);
 
             if (!result.Success)
+            {
                 return BadRequest(result.Message);
+            }
 
-            return CreatedAtAction(nameof(GetBookingById), new { id = result.Booking!.Id }, result);
+            return Ok(result);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpPut("{id:int}/cancel")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<TripBookingResult> CancelBooking([FromRoute] int id)
         {
             if (id <= 0)
@@ -91,11 +113,18 @@ namespace CarBookingAPI.Controllers
                 return BadRequest("Invalid booking ID.");
             }
 
-            TripBookingResult result = tripBookingService.CancelBooking(id);
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            TripBookingResult result = tripBookingService.CancelBooking(id, ownerId);
 
             if (!result.Success)
             {
-                if (result.Message == "Booking not found")
+                if (result.Message == "Booking not found.")
                 {
                     return NotFound(result.Message);
                 }
@@ -106,10 +135,12 @@ namespace CarBookingAPI.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpPut("{id:int}/complete")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<TripBookingResult> CompleteBooking([FromRoute] int id)
         {
             if (id <= 0)
@@ -117,11 +148,18 @@ namespace CarBookingAPI.Controllers
                 return BadRequest("Invalid booking ID.");
             }
 
-            TripBookingResult result = tripBookingService.CompleteBooking(id);
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            TripBookingResult result = tripBookingService.CompleteBooking(id, ownerId);
 
             if (!result.Success)
             {
-                if (result.Message == "Booking not found")
+                if (result.Message == "Booking not found.")
                 {
                     return NotFound(result.Message);
                 }
@@ -132,9 +170,12 @@ namespace CarBookingAPI.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpGet("customer/{customerId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<List<TripBookingResponse>> GetBookingsByCustomerId([FromRoute] int customerId)
         {
             if (customerId <= 0)
@@ -154,9 +195,12 @@ namespace CarBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpGet("car/{carId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<List<TripBookingResponse>> GetBookingsByCarId([FromRoute] int carId)
         {
             if (carId <= 0)
@@ -176,10 +220,12 @@ namespace CarBookingAPI.Controllers
             return Ok(bookings);
         }
 
+        [Authorize(Roles = "Owner")]
         [HttpGet("owner/{ownerId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<List<TripBooking>> GetOwnerTrips([FromRoute] int ownerId)
         {
             if (ownerId <= 0)
@@ -187,13 +233,46 @@ namespace CarBookingAPI.Controllers
                 return BadRequest();
             }
 
-            Owner? o = ownerService.GetOwnerById(ownerId);
-            if(o is null)
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int loggedInOwnerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            if (ownerId != loggedInOwnerId)
+            {
+                return BadRequest("You can only access your own trips.");
+            }
+
+            Owner? owner = ownerService.GetOwnerById(ownerId);
+
+            if (owner is null)
             {
                 return NotFound("Owner not found");
             }
 
             return Ok(tripBookingService.GetOwnersBooking(ownerId));
         }
+
+        [Authorize(Roles = "Owner")]
+        [HttpGet("me/dashboard")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<OwnerDashboardResponse> GetMyDashboard()
+        {
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            OwnerDashboardResponse dashboard = tripBookingService.GetDashboardByOwnerId(ownerId);
+
+            return Ok(dashboard);
+        }
+
     }
+
 }

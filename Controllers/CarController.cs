@@ -127,19 +127,21 @@ namespace CarBookingAPI.Controllers
                 return Unauthorized("Invalid token.");
             }
 
+            bool deleted = carService.DeleteCar(id, ownerId);
+
             List<TripBookingResponse> trips = tripBookingService.GetBookingsByCarId(id);
+
+            if (!deleted)
+            {
+                return NotFound("Car not found.");
+            }
 
             if (trips.Any())
             {
                 return BadRequest("Cars having trips cannot be deleted.");
             }
 
-            bool deleted = carService.DeleteCar(id, ownerId);
 
-            if (!deleted)
-            {
-                return NotFound("Car not found.");
-            }
 
             return Ok("Car deleted successfully.");
         }
@@ -151,5 +153,22 @@ namespace CarBookingAPI.Controllers
             List<Car> availableCars = carService.GetAvailableCars();
             return Ok(availableCars);
         }
+
+        [Authorize(Roles = "Owner")]
+        [HttpGet("me/available")]
+        public ActionResult<List<Car>> GetMyAvailableCars()
+        {
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            List<Car> cars = carService.GetAvailableCarsByOwnerId(ownerId);
+
+            return Ok(cars);
+        }
+
     }
 }

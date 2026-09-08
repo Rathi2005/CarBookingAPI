@@ -15,5 +15,7 @@ namespace CarBookingAPI.Interfaces
         bool DeleteCar(int id, int ownerId);
 
         bool SetCarAvailability(int carId, bool isAvailable);
+        List<Car> GetAvailableCarsByOwnerId(int ownerId);
+
     }
 }

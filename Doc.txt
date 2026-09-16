@@ -1,0 +1,855 @@
+Project Name
+Drive Owner — Owner Operated Car Trip Management PWA
+1. Product Vision
+
+Build a professional mobile-first Progressive Web Application (PWA) designed specifically for small fleet owners who personally manage their vehicles and trips.
+
+The application is not a public car rental marketplace.
+
+It is an internal business management system for a vehicle owner who wants to digitize daily operations.
+
+Example user:
+
+A person owns 2–10 cars and manages:
+
+customer bookings
+trip details
+vehicle availability
+earnings
+reports
+operational history
+
+The current manual process is:
+
+Customer calls owner
+
+        ↓
+
+Owner notes trip details manually
+
+        ↓
+
+Assigns vehicle
+
+        ↓
+
+Tracks payment manually
+
+        ↓
+
+Calculates monthly earnings manually
+
+Drive Owner converts this into:
+
+Customer Request
+
+        ↓
+
+Create Digital Trip
+
+        ↓
+
+Assign Vehicle
+
+        ↓
+
+Track Status
+
+        ↓
+
+Generate Reports
+
+        ↓
+
+Analyze Business Performance
+2. Product Goal
+
+Create a system that feels like:
+
+modern banking application
+fleet management dashboard
+business analytics tool
+
+The application should be:
+
+simple
+fast
+professional
+mobile friendly
+easy for non-technical owners
+3. Version Scope
+Version 1 — Owner Workflow Only
+
+Only one role exists:
+
+OWNER
+
+The owner can:
+
+Authentication
+Register
+Login
+Logout
+Maintain session
+JWT authentication
+Vehicle Management
+
+Owner can:
+
+View vehicles
+Add vehicles
+Edit vehicles
+Delete vehicles
+Monitor availability
+Trip Management
+
+Owner can:
+
+Create trips manually
+Select vehicle
+Add customer information
+Track trip status
+View trip history
+Reports
+
+Owner can:
+
+View daily reports
+View monthly reports
+Track revenue
+Analyze vehicle performance
+Profile
+
+Owner can:
+
+View personal information
+Manage account details
+4. Technology Stack
+Frontend
+React
+Vite
+JavaScript
+Tailwind CSS
+React Router
+Axios
+Lucide React Icons
+React Hot Toast
+Vite PWA Plugin
+Backend Integration
+
+Backend already exists:
+
+ASP.NET Core Web API
+
+        |
+
+JWT Authentication
+
+        |
+
+Owner Specific Authorization
+
+        |
+
+Database
+
+Frontend must be:
+
+API driven
+cleanly separated
+backend independent
+5. Application Architecture
+
+Final architecture:
+
+React PWA
+
+
+        |
+
+        |
+
+Pages
+
+
+        |
+
+        |
+
+Reusable Components
+
+
+        |
+
+        |
+
+Services Layer
+
+
+        |
+
+        |
+
+Axios Client
+
+
+        |
+
+        |
+
+ASP.NET Core API
+
+
+        |
+
+        |
+
+JWT Authentication
+
+6. Folder Structure
+
+Current structure:
+
+src
+
+│
+├── api
+│   └── axiosClient.js
+│
+├── assets
+│
+├── components
+│
+│   ├── common
+│   │
+│   ├── cars
+│   │
+│   ├── trips
+│   │
+│   ├── reports
+│   │
+│   ├── auth
+│
+│
+├── context
+│   └── AuthContext.jsx
+│
+├── layouts
+│
+│   └── DashboardLayout.jsx
+│
+├── pages
+│
+│   ├── auth
+│   │
+│   ├── dashboard
+│   │
+│   ├── cars
+│   │
+│   ├── trips
+│   │
+│   ├── reports
+│   │
+│   └── Profile
+│
+├── routes
+│
+│   ├── AppRoutes.jsx
+│   └── ProtectedRoute.jsx
+│
+├── services
+│
+│   ├── authService.js
+│   ├── carService.js
+│   ├── tripService.js
+│   └── reportService.js
+│
+└── App.jsx
+
+7. Completed Development Phases
+Phase 1 — Foundation ✅
+
+Completed:
+
+React + Vite setup
+Tailwind CSS
+React Router
+Axios configuration
+PWA configuration
+Folder architecture
+Phase 2 — Authentication Architecture ✅
+
+Implemented:
+
+Auth Context
+
+Responsible for:
+
+user state
+login state
+logout
+JWT Storage
+
+Token handling:
+
+localStorage
+
+        |
+
+JWT Token
+
+        |
+
+Axios Interceptor
+Protected Route
+
+Created:
+
+ProtectedRoute.jsx
+
+Initially bypassed for UI development.
+
+Later restored.
+
+Phase 3 — Dashboard Shell ✅
+
+Created:
+
+Dashboard Layout
+
+Desktop:
+
+Sidebar
+
+        |
+
+        |
+
+Content Area
+
+
+Mobile:
+
+Topbar
+
+Content
+
+Bottom Navigation
+
+
+Implemented:
+
+Sidebar
+Topbar
+Responsive layout
+Mobile navigation
+Phase 4 — Dashboard UI ✅
+
+Dashboard design follows Stitch UI.
+
+Features:
+
+Welcome Banner
+
+Example:
+
+Welcome back 👋 Rohit
+
+Manage your cars, trips and earnings
+Statistics Cards
+
+Cards:
+
+Total Cars
+
+Total Trips
+
+Completed Trips
+
+Total Earnings
+Recent Trips
+
+Displays:
+
+customer
+vehicle
+route
+amount
+Quick Actions
+
+Example:
+
+Create Trip
+
+Add Car
+Phase 5 — Vehicle Management ✅
+My Cars Page
+
+Redesigned according to Stitch.
+
+Layout:
+
+Header
+
+        |
+
+Fleet Statistics
+
+        |
+
+Search
+
+        |
+
+Vehicle Cards
+
+Vehicle Card Design
+
+Each card contains:
+
+Vehicle Image/Icon
+
+Vehicle Name
+
+Year
+
+Status
+
+Price/km
+
+Total Trips
+
+Monthly Earnings
+
+Actions
+
+Edit
+
+Delete
+
+Trips
+
+
+Example:
+
+Toyota Innova Crysta
+
+Available
+
+
+₹18/km
+
+48 Trips
+
+₹86,400 Revenue
+
+Phase 6 — Trip Management 🚗
+Create Trip Module
+
+Current design:
+
+Stitch inspired.
+
+Structure:
+
+Create Trip
+
+
+LEFT SIDE
+
+Customer Details
+
+Vehicle Selection
+
+Trip Details
+
+
+RIGHT SIDE
+
+Estimated Fare
+
+Trip Summary
+
+Create Trip Form
+
+Sections:
+
+1. Customer Details
+
+Fields:
+
+Customer Name
+
+Phone Number
+2. Vehicle Selection
+
+Dropdown:
+
+Toyota Innova
+₹18/km
+
+
+Scorpio N
+₹22/km
+
+Only owner's vehicles should appear.
+
+3. Trip Details
+
+Fields:
+
+Pickup Location
+
+Drop Location
+
+Distance
+Price Preview
+
+Dynamic calculation:
+
+Distance × Price/km
+
+
+Example:
+
+50km × ₹18
+
+=
+
+₹900
+Phase 7 — Authentication UI Redesign ✅
+
+Authentication was redesigned using Stitch design.
+
+New layout:
+
+--------------------------------
+
+
+LEFT PANEL
+
+
+Drive Owner Branding
+
+Features
+
+Statistics
+
+Testimonial
+
+
+
+RIGHT PANEL
+
+
+Login/Register Card
+
+
+
+--------------------------------
+Auth Brand Panel
+
+Contains:
+
+Branding
+DRIVEOWNER
+
+Mission Critical Fleet Suite
+Features
+
+Cards:
+
+Instant Trip & Odometer Audits
+
+
+WhatsApp & SMS Invoicing
+
+
+Driver Data & Fuel Ledger
+Business Statistics
+
+Example:
+
+₹2.4L+
+
+Tracked/month
+
+
+99.8%
+
+SLA uptime
+
+
+<10s
+
+Trip Log
+
+Login Page
+
+Design:
+
+Welcome Back,
+Fleet Owner
+
+
+Mobile Number
+
+Password
+
+
+Sign In
+
+
+Additional:
+
+256-bit SSL Banking Grade
+
+Secure Session
+
+Register Page
+
+Design:
+
+Create Owner Account
+
+
+Owner Name
+
+Mobile Number
+
+Email
+
+Password
+
+Confirm Password
+
+
+Create Fleet Account
+
+
+Security cards:
+
+Secure JWT Auth
+
+Instant Setup
+
+8. Current UI Design System
+
+All screens must follow:
+
+Colors
+
+Primary:
+
+#2147c6
+
+Background:
+
+#f6f8fc
+
+Success:
+
+Green
+
+Warning:
+
+Amber
+
+Danger:
+
+Red
+Cards
+
+Always:
+
+rounded-2xl
+
+border
+
+shadow-sm
+
+bg-white
+Buttons
+
+Style:
+
+rounded-xl
+
+large padding
+
+font-bold
+
+blue primary
+Typography
+
+Headings:
+
+font-extrabold
+
+Body:
+
+text-slate-500
+9. Development Rules
+
+Always:
+
+✅ Component based architecture
+
+✅ Reusable UI components
+
+✅ Mobile first
+
+✅ API separation
+
+✅ Clean folder structure
+
+✅ Tailwind only
+
+✅ Responsive design
+
+Avoid:
+
+❌ Backend logic inside components
+
+❌ Hardcoded API URLs
+
+❌ Duplicate UI
+
+❌ Large components
+
+10. Current Development State
+
+Completed:
+
+Authentication UI       ✅
+
+Dashboard               ✅
+
+Sidebar                 ✅
+
+Topbar                  ✅
+
+Cars Module             ✅
+
+Create Trip UI           ✅
+
+Trip Layout              ✅
+
+Reports Structure        ✅
+
+
+Currently working on:
+
+UI polishing
+
+Backend integration
+
+JWT authentication
+
+Reports
+
+PWA improvements
+
+11. Future Improvements
+Trip Module
+
+Add:
+
+live status
+complete trip
+cancel trip
+customer history
+payment tracking
+Reports
+
+Add:
+
+Daily:
+
+Trips
+
+Revenue
+
+Distance
+
+Completed
+
+Cancelled
+
+Monthly:
+
+Vehicle Performance
+
+Profit Analysis
+
+Revenue Trends
+PWA Features
+
+Add:
+
+offline caching
+install prompt
+push notifications
+background sync
+Mobile Experience
+
+Add:
+
+Bottom navigation:
+
+Home
+
+Cars
+
+Trips
+
+Reports
+
+Profile
+
+12. Final Product Vision
+
+The final application should become:
+
+                 DRIVE OWNER
+
+
+Dashboard
+
+     |
+
+Cars
+
+     |
+
+Trips
+
+     |
+
+Reports
+
+     |
+
+Profile
+
+
+A complete owner-operated fleet management application that helps small vehicle owners manage their business digitally.
+
+Important Instruction For Future Development
+
+When continuing development:
+
+Maintain the current Stitch-inspired design language.
+Do not create simple admin dashboards.
+Every page should feel like a premium SaaS fleet management application.
+Every new module should match existing UI/UX.
+Keep scalability in mind because future versions may include:
+multiple owners
+drivers
+payments
+GPS tracking
+customer booking
+analytics
+fleet expansion
+
+The current objective is to build a production-quality foundation, not just a prototype.

@@ -1,6 +1,59 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import AuthLayout from "../../components/auth/AuthLayout";
 
+import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
+
 function Login() {
+  const navigate = useNavigate();
+
+  const { login } = useAuth();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
+  function handleChange(e) {
+    setFormData({
+      ...formData,
+
+      [e.target.name]: e.target.value,
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      setError("");
+
+      const response = await authService.login(formData);
+
+      console.log("LOGIN RESPONSE", response.data);
+
+      const token = response.data.token;
+
+      login(token);
+
+      navigate("/dashboard");
+    } catch (err) {
+      console.log("LOGIN ERROR", err);
+
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <AuthLayout>
       <div
@@ -36,8 +89,25 @@ mt-2
           </p>
         </div>
 
-        <div className="space-y-4">
+        {error && (
+          <div
+            className="
+bg-red-50
+text-red-600
+p-3
+rounded-xl
+mb-4
+"
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             placeholder="Mobile Number or Email"
             className="
 w-full
@@ -50,6 +120,9 @@ outline-none
           />
 
           <input
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             type="password"
             placeholder="Password"
             className="
@@ -63,6 +136,8 @@ outline-none
           />
 
           <button
+            type="submit"
+            disabled={loading}
             className="
 w-full
 h-12
@@ -70,11 +145,12 @@ rounded-xl
 bg-[#2147c6]
 text-white
 font-bold
+disabled:opacity-50
 "
           >
-            Sign In to Fleet Command →
+            {loading ? "Signing in..." : "Sign In to Fleet Command →"}
           </button>
-        </div>
+        </form>
 
         <div
           className="

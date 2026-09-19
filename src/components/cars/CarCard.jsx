@@ -135,7 +135,7 @@ font-extrabold
 mt-1
 "
           >
-            48
+            <h3>{car.tripBookings?.length || 0}</h3>
           </p>
         </div>
       </div>

@@ -14,99 +14,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
-
+import { useTrips } from "../../hooks/useTrips";
+import tripService from "../../services/tripService";
 import TripCard from "../../components/trips/TripCard";
-
-const demoTrips = [
-  {
-    id: 1,
-    tripId: "#TR-8903",
-    customerName: "Rahul Sharma",
-    customerPhone: "9876543210",
-    carName: "Toyota Innova Crysta",
-    plate: "DL 01 AX 9921",
-    pickup: "Delhi",
-    drop: "Gurgaon",
-    distance: 42,
-    totalAmount: 1800,
-    status: "Completed",
-    date: "12 Sep 2026",
-    time: "09:30 AM",
-    paymentStatus: "Paid via UPI",
-  },
-  {
-    id: 2,
-    tripId: "#TR-8904",
-    customerName: "Amit Kumar",
-    customerPhone: "9988776655",
-    carName: "Mahindra Scorpio N",
-    plate: "DL 04 CZ 3012",
-    pickup: "Noida",
-    drop: "Delhi",
-    distance: 38,
-    totalAmount: 2200,
-    status: "Active",
-    date: "Today",
-    time: "11:15 AM",
-    paymentStatus: "Reserved",
-  },
-  {
-    id: 3,
-    tripId: "#TR-8902",
-    customerName: "Neha Singh",
-    customerPhone: "8899001122",
-    carName: "Maruti Suzuki Ertiga",
-    plate: "DL 04 CZ 3012",
-    pickup: "Faridabad",
-    drop: "Delhi",
-    distance: 25,
-    totalAmount: 1450,
-    status: "Upcoming",
-    date: "Tomorrow",
-    time: "07:00 AM",
-    paymentStatus: "Reserved",
-  },
-  {
-    id: 4,
-    tripId: "#TR-8901",
-    customerName: "Priya Patel",
-    customerPhone: "9812345678",
-    carName: "Toyota Innova Crysta",
-    plate: "DL 01 AX 9921",
-    pickup: "Noida Sector 62",
-    drop: "IGI Airport Terminal 3",
-    distance: 38,
-    totalAmount: 1450,
-    status: "Completed",
-    date: "10 Sep 2026",
-    time: "08:45 AM",
-    paymentStatus: "Paid via UPI",
-  },
-  {
-    id: 5,
-    tripId: "#TR-8900",
-    customerName: "Vikram Malhotra",
-    customerPhone: "9900112233",
-    carName: "Toyota Fortuner",
-    plate: "DL 09 BF 7001",
-    pickup: "Aerocity",
-    drop: "Cyber Hub",
-    distance: 26,
-    totalAmount: 2200,
-    status: "Cancelled",
-    date: "09 Sep 2026",
-    time: "07:00 PM",
-    paymentStatus: "Refund Pending",
-  },
-];
-
-const vehicles = [
-  "All Vehicles",
-  "Toyota Innova Crysta",
-  "Mahindra Scorpio N",
-  "Maruti Suzuki Ertiga",
-  "Toyota Fortuner",
-];
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 function StatCard({ icon: Icon, label, value, helper, iconClass }) {
   return (
@@ -135,64 +46,127 @@ function StatCard({ icon: Icon, label, value, helper, iconClass }) {
 }
 
 function Trips() {
-  const [trips, setTrips] = useState(demoTrips);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [vehicleFilter, setVehicleFilter] = useState("All Vehicles");
+  const [processingTrip, setProcessingTrip] = useState({
+    id: null,
+    action: null,
+  });
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
-  const completeTrip = (id) => {
-    setTrips((currentTrips) =>
-      currentTrips.map((trip) =>
-        trip.id === id
-          ? {
-              ...trip,
-              status: "Completed",
-              paymentStatus: "Paid",
-            }
-          : trip
-      )
-    );
+  const { data, isLoading, isError, refetch } = useTrips();
 
-    toast.success("Trip completed");
-  };
+  const apiTrips = data || [];
 
-  const cancelTrip = (id) => {
-    setTrips((currentTrips) =>
-      currentTrips.map((trip) =>
-        trip.id === id
-          ? {
-              ...trip,
-              status: "Cancelled",
-            }
-          : trip
-      )
-    );
+  async function handleCompleteTrip(id) {
+    try {
+      setProcessingTrip({
+        id,
+        action: "complete",
+      });
 
-    toast.error("Trip cancelled");
-  };
+      await tripService.completeTrip(id);
+
+      toast.success("Trip completed successfully");
+
+      refetch();
+    } catch (error) {
+      console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to complete trip");
+    } finally {
+      setProcessingTrip({
+        id: null,
+        action: null,
+      });
+    }
+  }
+
+  async function handleCancelTrip(id) {
+    try {
+      setProcessingTrip({
+        id,
+        action: "cancel",
+      });
+
+      await tripService.cancelTrip(id);
+
+      toast.success("Trip cancelled successfully");
+
+      refetch();
+    } catch (error) {
+      console.error(error);
+
+      toast.error(error.response?.data?.message || "Unable to cancel trip");
+    } finally {
+      setProcessingTrip({
+        id: null,
+        action: null,
+      });
+    }
+  }
+
+  const trips = apiTrips.map((trip) => ({
+    id: trip.id,
+
+    tripId: `#TR-${trip.id}`,
+
+    customerName: trip.customerName || "Walk-in Customer",
+
+    customerPhone: "",
+
+    carName: `${trip.carBrand} ${trip.carModel}`,
+
+    pickup: trip.pickupLocation,
+
+    drop: trip.dropLocation,
+
+    distance: trip.distanceInKm,
+
+    totalAmount: trip.totalPrice,
+
+    status: trip.status,
+
+    date: new Date(trip.bookingDate).toLocaleDateString(),
+
+    time: new Date(trip.bookingDate).toLocaleTimeString(),
+
+    paymentStatus: "Pending",
+  }));
+
+  const vehicles = [
+    "All Vehicles",
+    ...new Set(trips.map((trip) => trip.carName)),
+  ];
 
   const filteredTrips = useMemo(() => {
     return trips.filter((trip) => {
       const searchValue = search.toLowerCase();
 
       const matchesSearch =
-        trip.customerName.toLowerCase().includes(searchValue) ||
-        trip.customerPhone.includes(searchValue) ||
-        trip.carName.toLowerCase().includes(searchValue) ||
-        trip.plate.toLowerCase().includes(searchValue) ||
-        trip.pickup.toLowerCase().includes(searchValue) ||
-        trip.drop.toLowerCase().includes(searchValue);
+        (trip.customerName || "").toLowerCase().includes(searchValue) ||
+        (trip.carName || "").toLowerCase().includes(searchValue) ||
+        (trip.pickup || "").toLowerCase().includes(searchValue) ||
+        (trip.drop || "").toLowerCase().includes(searchValue);
 
       const matchesStatus =
         statusFilter === "All" || trip.status === statusFilter;
 
       const matchesVehicle =
-        vehicleFilter === "All Vehicles" ||
-        trip.carName === vehicleFilter;
+        vehicleFilter === "All Vehicles" || trip.carName === vehicleFilter;
 
       return matchesSearch && matchesStatus && matchesVehicle;
     });
   }, [trips, search, statusFilter, vehicleFilter]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <p>Failed to load trips</p>;
+  }
 
   const counts = {
     All: trips.length,
@@ -203,25 +177,20 @@ function Trips() {
   };
 
   const todayRevenue = trips
-    .filter(
-      (trip) =>
-        trip.status === "Active" || trip.date === "Today"
-    )
-    .reduce((total, trip) => total + trip.totalAmount, 0);
+    .filter((trip) => trip.status === "Active")
+    .reduce((total, trip) => total + Number(trip.totalAmount || 0), 0);
 
   const totalDistance = trips.reduce(
     (total, trip) => total + Number(trip.distance || 0),
-    0
+    0,
   );
 
   const completedTrips = trips.filter(
-    (trip) => trip.status === "Completed"
+    (trip) => trip.status === "Completed",
   ).length;
 
   const settlementRate =
-    trips.length > 0
-      ? Math.round((completedTrips / trips.length) * 100)
-      : 0;
+    trips.length > 0 ? Math.round((completedTrips / trips.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -356,7 +325,9 @@ function Trips() {
 
           {/* Export */}
           <button
-            onClick={() => toast.success("Export will be available with the reports API")}
+            onClick={() =>
+              toast.success("Export will be available with the reports API")
+            }
             className="inline-flex h-11 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[9px] font-bold text-slate-600 hover:bg-slate-50"
           >
             <Download size={13} />
@@ -383,7 +354,7 @@ function Trips() {
                   {status} ({counts[status]})
                 </button>
               );
-            }
+            },
           )}
         </div>
       </section>
@@ -426,8 +397,9 @@ function Trips() {
               <TripCard
                 key={trip.id}
                 trip={trip}
-                onComplete={completeTrip}
-                onCancel={cancelTrip}
+                onComplete={handleCompleteTrip}
+                onCancel={handleCancelTrip}
+                loading={processingTrip}
               />
             ))}
           </div>

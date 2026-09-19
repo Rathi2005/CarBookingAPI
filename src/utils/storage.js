@@ -1,63 +1,23 @@
-const TOKEN_KEY = "owner_token";
-const USER_KEY = "owner_user";
+const TOKEN_KEY = "drive_owner_token";
 
+console.log("Storage Loaded");
 
-export const storage = {
+export function setToken(token) {
+  console.log("Saving Token:", token);
 
-    setToken(token){
-        localStorage.setItem(
-            TOKEN_KEY,
-            token
-        );
-    },
+  localStorage.setItem(TOKEN_KEY, token);
+}
 
+export function getToken() {
+  const token = localStorage.getItem(TOKEN_KEY);
 
-    getToken(){
+  console.log("Getting Token:", token);
 
-        return localStorage.getItem(
-            TOKEN_KEY
-        );
+  return token;
+}
 
-    },
+export function removeToken() {
+  console.log("Removing Token");
 
-
-    removeToken(){
-
-        localStorage.removeItem(
-            TOKEN_KEY
-        );
-
-    },
-
-
-    setUser(user){
-
-        localStorage.setItem(
-            USER_KEY,
-            JSON.stringify(user)
-        );
-
-    },
-
-
-    getUser(){
-
-        const user =
-        localStorage.getItem(USER_KEY);
-
-
-        return user 
-        ? JSON.parse(user)
-        : null;
-
-    },
-
-
-    clear(){
-
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
-
-    }
-
+  localStorage.removeItem(TOKEN_KEY);
 }

@@ -1,78 +1,59 @@
 import axios from "axios";
-import { storage } from "../utils/storage";
 
+import { getToken, removeToken } from "../utils/storage";
+
+console.log("Axios Client Loaded");
 
 const axiosClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 
-    baseURL:
-    import.meta.env.VITE_API_BASE_URL,
-
-    headers:{
-        "Content-Type":"application/json"
-    }
-
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-
-
-// Attach JWT automatically
+console.log("API BASE URL:", import.meta.env.VITE_API_BASE_URL);
 
 axiosClient.interceptors.request.use(
+  (config) => {
+    console.log("REQUEST:", config.url);
 
-(config)=>{
+    const token = getToken();
 
-    const token =
-    storage.getToken();
+    if (token) {
+      console.log("Attaching JWT");
 
-
-    if(token){
-
-        config.headers.Authorization =
-        `Bearer ${token}`;
-
+      config.headers.Authorization = `Bearer ${token}`;
     }
-
 
     return config;
+  },
 
-},
-
-
-(error)=>{
+  (error) => {
+    console.log("REQUEST ERROR", error);
 
     return Promise.reject(error);
-
-}
-
+  },
 );
-
-
-
-
-// Handle unauthorized
 
 axiosClient.interceptors.response.use(
+  (response) => {
+    console.log("API RESPONSE:", response);
 
-(response)=>response,
+    return response;
+  },
 
+  (error) => {
+    console.log("API ERROR:", error);
 
-(error)=>{
+    if (error.response?.status === 401) {
+      removeToken();
 
-
-    if(error.response?.status===401){
-
-        storage.clear();
-
-        window.location.href="/login";
-
+      window.location.href = "/login";
     }
 
-
     return Promise.reject(error);
-
-}
-
+  },
 );
-
 
 export default axiosClient;

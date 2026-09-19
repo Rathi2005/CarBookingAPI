@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { carService } from "../../services/carService";
+import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Plus, SlidersHorizontal } from "lucide-react";
 
@@ -9,41 +11,12 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import EmptyState from "../../components/common/EmptyState";
 import ConfirmModal from "../../components/common/ConfirmModal";
 
-const demoCars = [
-  {
-    id: 1,
-    brand: "Toyota",
-    model: "Innova Crysta",
-    year: 2024,
-    pricePerKm: 18,
-    status: "Available",
-  },
-
-  {
-    id: 2,
-    brand: "Mahindra",
-    model: "Scorpio N",
-    year: 2023,
-    pricePerKm: 22,
-    status: "Unavailable",
-  },
-
-  {
-    id: 3,
-    brand: "Maruti",
-    model: "Ertiga",
-    year: 2025,
-    pricePerKm: 15,
-    status: "Available",
-  },
-];
-
 function Cars() {
   const navigate = useNavigate();
 
-  const [cars, setCars] = useState(demoCars);
+  const [cars, setCars] = useState([]);
 
-  const [filteredCars, setFilteredCars] = useState(demoCars);
+  const [filteredCars, setFilteredCars] = useState([]);
 
   const [search, setSearch] = useState("");
 
@@ -52,11 +25,28 @@ function Cars() {
   const [selectedCar, setSelectedCar] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function fetchCars() {
+    try {
+      setLoading(true);
+
+      const response = await carService.getCars();
+
+      setCars(response.data);
+
+      setFilteredCars(response.data);
+    } catch (error) {
+      console.error("Failed to fetch cars", error);
+
+      toast.error(error.response?.data?.message || "Unable to load cars");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    fetchCars();
   }, []);
 
   function handleSearch(value) {
@@ -83,16 +73,28 @@ function Cars() {
     setShowDeleteModal(true);
   }
 
-  function deleteCar() {
-    const updatedCars = cars.filter((car) => car.id !== selectedCar.id);
+  async function deleteCar() {
+    try {
+      setDeleting(true);
 
-    setCars(updatedCars);
+      await carService.deleteCar(selectedCar.id);
 
-    setFilteredCars(updatedCars);
+      toast.success(
+        `${selectedCar.brand} ${selectedCar.model} deleted successfully`,
+      );
 
-    setSelectedCar(null);
+      fetchCars();
+    } catch (error) {
+      console.error("Delete failed", error);
 
-    setShowDeleteModal(false);
+      toast.error(error.response?.data?.message || "Unable to delete car");
+    } finally {
+      setDeleting(false);
+
+      setSelectedCar(null);
+
+      setShowDeleteModal(false);
+    }
   }
 
   function handleEdit(id) {
@@ -189,7 +191,7 @@ transition
 
       {/* Stats */}
 
-      <CarStats />
+      <CarStats cars={cars} />
 
       {/* Filters */}
 
@@ -325,7 +327,11 @@ gap-6
           {filteredCars.map((car) => (
             <CarCard
               key={car.id}
-              car={car}
+              car={{
+                ...car,
+
+                status: car.isAvailable ? "Available" : "Unavailable",
+              }}
               onEdit={handleEdit}
               onDelete={() => openDeleteModal(car)}
             />
@@ -340,9 +346,9 @@ gap-6
         title="Delete Vehicle?"
         message={`Are you sure you want to delete ${selectedCar?.brand} ${selectedCar?.model}?`}
         confirmText="Delete"
+        loading={deleting}
         onCancel={() => {
           setShowDeleteModal(false);
-
           setSelectedCar(null);
         }}
         onConfirm={deleteCar}

@@ -1,40 +1,44 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
-import { storage } from "../utils/storage";
+import { getToken, setToken, removeToken } from "../utils/storage";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(storage.getUser());
+  const [token, setTokenState] = useState(() => getToken());
 
-  const [token, setToken] = useState(storage.getToken());
+  const user = useMemo(() => {
+    if (!token) {
+      return null;
+    }
 
-  const login = (data) => {
-    storage.setToken(data.token);
+    try {
+      return jwtDecode(token);
+    } catch (error) {
+      console.error("Failed to decode JWT:", error);
+      return null;
+    }
+  }, [token]);
 
-    storage.setUser(data.user);
+  function login(userToken) {
+    setToken(userToken);
+    setTokenState(userToken);
+  }
 
-    setToken(data.token);
-
-    setUser(data.user);
-  };
-
-  const logout = () => {
-    storage.clear();
-
-    setToken(null);
-
-    setUser(null);
-  };
+  function logout() {
+    removeToken();
+    setTokenState(null);
+  }
 
   return (
     <AuthContext.Provider
       value={{
-        user,
         token,
+        user,
+        isAuthenticated: Boolean(token),
         login,
         logout,
-        isAuthenticated: !!token,
       }}
     >
       {children}

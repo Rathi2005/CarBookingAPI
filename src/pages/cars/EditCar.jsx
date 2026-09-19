@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import CarForm from "../../components/cars/CarForm";
 import VehiclePreview from "../../components/cars/VehiclePreview";
+import { carService } from "../../services/carService";
+import { toast } from "react-hot-toast";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 function EditCar() {
   const navigate = useNavigate();
@@ -10,16 +13,46 @@ function EditCar() {
   const { id } = useParams();
 
   const [formData, setFormData] = useState({
-    brand: "Toyota",
-
-    model: "Innova Crysta",
-
-    year: "2024",
-
-    pricePerKm: "18",
+    brand: "",
+    model: "",
+    year: "",
+    pricePerKm: "",
   });
 
   const [loading, setLoading] = useState(false);
+  async function fetchCar() {
+    try {
+      setLoading(true);
+
+      const response = await carService.getCarById(id);
+
+      const car = response.data;
+
+      setFormData({
+        brand: car.brand,
+
+        model: car.model,
+
+        year: car.year,
+
+        pricePerKm: car.pricePerKm,
+      });
+    } catch (error) {
+      console.error("Failed to fetch car", error);
+
+      toast.error("Unable to load vehicle");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchCar();
+  }, [id]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   function handleChange(e) {
     setFormData({
@@ -29,18 +62,22 @@ function EditCar() {
     });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    setTimeout(() => {
-      console.log("Update vehicle", id, formData);
+      await carService.updateCar(id, formData);
 
-      setLoading(false);
+      toast.success("Vehicle updated successfully");
 
       navigate("/cars");
-    }, 800);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update vehicle");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

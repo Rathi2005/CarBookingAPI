@@ -1,33 +1,21 @@
-// import { Navigate } from "react-router-dom";
-// import { useAuth } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
 
+import { useAuth } from "../context/AuthContext";
 
-// function ProtectedRoute({children}){
-
-
-//     const {isAuthenticated}=useAuth();
-
-
-//     if(!isAuthenticated){
-
-//         return <Navigate to="/login" replace />
-
-//     }
-
-
-//     return children;
-
-
-// }
-
-
-// export default ProtectedRoute;
+console.log("ProtectedRoute Loaded");
 
 function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth();
 
-    return children;
+  console.log("Protected Status:", isAuthenticated);
 
+  if (!isAuthenticated) {
+    console.log("Redirecting Login");
+
+    return <Navigate to="/login" />;
+  }
+
+  return children;
 }
-
 
 export default ProtectedRoute;

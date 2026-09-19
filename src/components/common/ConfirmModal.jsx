@@ -1,274 +1,193 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus } from "lucide-react";
+import { X, AlertTriangle } from "lucide-react";
 
-import CarCard from "../cars/CarCard";
-import LoadingSpinner from "./LoadingSpinner";
-import EmptyState from "./EmptyState";
+function ConfirmModal({
+  isOpen,
+  title,
+  message,
+  confirmText,
+  cancelText = "Cancel",
+  loading = false,
+  onConfirm,
+  onCancel,
+}) {
+  if (!isOpen) {
+    return null;
+  }
 
+  return (
+    <div
+      className="
+        fixed
+        inset-0
+        z-50
+        flex
+        items-center
+        justify-center
+        bg-black/40
+        px-4
+      "
+    >
+      {/* Modal */}
 
-const demoCars = [
-    {
-        id: 1,
-        brand: "Toyota",
-        model: "Innova Crysta",
-        year: 2024,
-        pricePerKm: 18,
-        status: "Available",
-    },
-    {
-        id: 2,
-        brand: "Mahindra",
-        model: "Scorpio N",
-        year: 2023,
-        pricePerKm: 22,
-        status: "Unavailable",
-    },
-    {
-        id: 3,
-        brand: "Maruti",
-        model: "Ertiga",
-        year: 2025,
-        pricePerKm: 15,
-        status: "Available",
-    },
-];
+      <div
+        className="
+          w-full
+          max-w-md
+          rounded-2xl
+          bg-white
+          p-6
+          shadow-xl
+        "
+      >
+        {/* Header */}
 
-
-function Cars() {
-    const navigate = useNavigate();
-
-    const [cars, setCars] = useState(demoCars);
-    const [filteredCars, setFilteredCars] = useState(demoCars);
-    const [search, setSearch] = useState("");
-    const [loading, setLoading] = useState(true);
-
-
-    useEffect(() => {
-        // Temporary demo data.
-        // API integration will replace this later.
-        setLoading(false);
-    }, []);
-
-
-    function handleSearch(value) {
-        setSearch(value);
-
-        const searchValue = value.toLowerCase().trim();
-
-        if (!searchValue) {
-            setFilteredCars(cars);
-            return;
-        }
-
-        const result = cars.filter((car) =>
-            `${car.brand} ${car.model} ${car.year}`
-                .toLowerCase()
-                .includes(searchValue)
-        );
-
-        setFilteredCars(result);
-    }
-
-
-    function handleDelete(id) {
-        const car = cars.find((item) => item.id === id);
-
-        const confirmed = window.confirm(
-            `Are you sure you want to delete ${car?.brand} ${car?.model}?`
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        const updatedCars = cars.filter(
-            (item) => item.id !== id
-        );
-
-        setCars(updatedCars);
-        setFilteredCars(updatedCars);
-    }
-
-
-    function handleEdit(id) {
-        navigate(`/cars/edit/${id}`);
-    }
-
-
-    if (loading) {
-        return <LoadingSpinner />;
-    }
-
-
-    return (
-        <div className="max-w-7xl mx-auto">
-
-            {/* Page Header */}
-            <div className="
+        <div
+          className="
+            flex
+            items-start
+            justify-between
+          "
+        >
+          <div
+            className="
+              flex
+              items-center
+              gap-3
+            "
+          >
+            <div
+              className="
                 flex
-                flex-col
-                gap-4
-                sm:flex-row
-                sm:items-center
-                sm:justify-between
-                mb-8
-            ">
-
-                <div>
-                    <h1 className="
-                        text-2xl
-                        sm:text-3xl
-                        font-bold
-                        text-slate-900
-                    ">
-                        My Cars
-                    </h1>
-
-                    <p className="
-                        text-sm
-                        sm:text-base
-                        text-slate-500
-                        mt-1
-                    ">
-                        Manage your vehicles and availability
-                    </p>
-                </div>
-
-
-                <Link
-                    to="/cars/add"
-                    className="
-                        inline-flex
-                        items-center
-                        justify-center
-                        gap-2
-                        bg-blue-600
-                        hover:bg-blue-700
-                        active:bg-blue-800
-                        text-white
-                        px-5
-                        py-3
-                        rounded-xl
-                        font-medium
-                        transition
-                        shadow-sm
-                        w-full
-                        sm:w-auto
-                    "
-                >
-                    <Plus size={20} />
-
-                    Add Car
-                </Link>
-
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-xl
+                bg-red-50
+                text-red-600
+              "
+            >
+              <AlertTriangle size={22} />
             </div>
 
+            <div>
+              <h2
+                className="
+                  text-lg
+                  font-extrabold
+                  text-slate-900
+                "
+              >
+                {title}
+              </h2>
 
-            {/* Search */}
-            <div className="
-                bg-white
-                border
-                border-slate-200
-                rounded-2xl
-                p-4
-                mb-6
-                shadow-sm
-            ">
-
-                <div className="
-                    flex
-                    items-center
-                    gap-3
-                    bg-slate-50
-                    border
-                    border-slate-200
-                    rounded-xl
-                    px-4
-                    py-3
-                ">
-
-                    <Search
-                        size={20}
-                        className="text-slate-400 shrink-0"
-                    />
-
-
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) =>
-                            handleSearch(e.target.value)
-                        }
-                        placeholder="Search by brand, model or year..."
-                        className="
-                            w-full
-                            bg-transparent
-                            outline-none
-                            text-sm
-                            text-slate-800
-                            placeholder:text-slate-400
-                        "
-                    />
-
-                </div>
-
+              <p
+                className="
+                  mt-1
+                  text-sm
+                  text-slate-500
+                "
+              >
+                Please confirm this action.
+              </p>
             </div>
+          </div>
 
+          <button
+            onClick={onCancel}
+            className="
+              rounded-lg
+              p-2
+              text-slate-400
+              hover:bg-slate-100
+            "
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-            {/* Results Count */}
-            <div className="mb-4">
+        {/* Message */}
 
-                <p className="
-                    text-sm
-                    text-slate-500
-                ">
-                    {filteredCars.length}{" "}
-                    {filteredCars.length === 1 ? "car" : "cars"} found
-                </p>
+        <p
+          className="
+            mt-5
+            text-sm
+            leading-6
+            text-slate-600
+          "
+        >
+          {message}
+        </p>
 
-            </div>
+        {/* Actions */}
 
+        <div
+          className="
+            mt-6
+            flex
+            justify-end
+            gap-3
+          "
+        >
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="
+    rounded-xl
+    border
+    border-slate-200
+    bg-white
+    px-5
+    py-2.5
+    text-sm
+    font-bold
+    text-slate-600
+    hover:bg-slate-50
+    disabled:opacity-50
+  "
+          >
+            {cancelText}
+          </button>
 
-            {/* Cars */}
-            {filteredCars.length === 0 ? (
-
-                <EmptyState
-                    message={
-                        search
-                            ? "No cars match your search."
-                            : "You haven't added any cars yet."
-                    }
-                />
-
-            ) : (
-
-                <div className="
-                    grid
-                    grid-cols-1
-                    md:grid-cols-2
-                    xl:grid-cols-3
-                    gap-5
-                ">
-
-                    {filteredCars.map((car) => (
-
-                        <CarCard
-                            key={car.id}
-                            car={car}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                        />
-
-                    ))}
-
-                </div>
-
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="
+    rounded-xl
+    bg-red-600
+    px-5
+    py-2.5
+    text-sm
+    font-bold
+    text-white
+    hover:bg-red-700
+    disabled:opacity-70
+    flex
+    items-center
+    justify-center
+    gap-2
+  "
+          >
+            {loading && (
+              <span
+                className="
+        h-4
+        w-4
+        animate-spin
+        rounded-full
+        border-2
+        border-white
+        border-t-transparent
+      "
+              />
             )}
 
+            {loading ? "Deleting..." : confirmText}
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
-
-export default Cars;
+export default ConfirmModal;

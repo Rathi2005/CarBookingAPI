@@ -74,11 +74,8 @@ builder.Services.AddScoped<ITripBookingService, TripBookingService>();
 // Registering the AppDbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(
-            builder.Configuration.GetConnectionString("DefaultConnection")
-        )
+    options.UseMySQL(
+        builder.Configuration.GetConnectionString("DefaultConnection")
     );
 });
 

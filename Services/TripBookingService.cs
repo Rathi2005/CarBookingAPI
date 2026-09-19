@@ -84,11 +84,11 @@ namespace CarBookingAPI.Services
 
         public TripBookingResult CreateBooking(int ownerId, CreateTripBookingRequest request)
         {
-            Customer? customer = context.Customers.FirstOrDefault(c => c.Id == request.CustomerId);
-            if (customer is null)
-            {
-                return TripBookingResult.Fail("Customer not found.");
-            }
+            // Customer? customer = context.Customers.FirstOrDefault(c => c.Id == request.CustomerId);
+            // if (customer is null)
+            // {
+            //     return TripBookingResult.Fail("Customer not found.");
+            // }
 
             Car? car = context.Cars.FirstOrDefault(c => c.Id == request.CarId);
             if (car is null)

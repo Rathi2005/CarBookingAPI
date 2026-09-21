@@ -12,6 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+Console.WriteLine(
+    $"Connection String Exists: {!string.IsNullOrEmpty(connectionString)}"
+);
+
+Console.WriteLine(
+    $"Environment: {builder.Environment.EnvironmentName}"
+);
+
 // the below functionality helps to ignore the cyclic behaviour of .Include() causing infinite loop
 // eg:- car.Owner => car has owner, owner has cars, then again car has owner and so on.
 builder.Services.AddControllers().AddJsonOptions(options =>

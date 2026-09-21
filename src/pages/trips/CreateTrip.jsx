@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { carService } from "../../services/carService";
+import tripService from "../../services/tripService";
+
+import { useNavigate } from "react-router-dom";
 
 import TripForm from "../../components/trips/TripForm";
 
@@ -6,32 +11,14 @@ import PricePreview from "../../components/trips/PricePreview";
 
 import { toast } from "react-hot-toast";
 
-const demoCars = [
-  {
-    id: 1,
-    brand: "Toyota",
-    model: "Innova Crysta",
-    pricePerKm: 18,
-  },
-
-  {
-    id: 2,
-    brand: "Mahindra",
-    model: "Scorpio N",
-    pricePerKm: 20,
-  },
-
-  {
-    id: 3,
-    brand: "Maruti",
-    model: "Ertiga",
-    pricePerKm: 15,
-  },
-];
-
 const CreateTrip = () => {
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
 
+  const [cars, setCars] = useState([]);
+
+  const [carsLoading, setCarsLoading] = useState(true);
   const [formData, setFormData] = useState({
     customerName: "",
 
@@ -46,8 +33,27 @@ const CreateTrip = () => {
     distance: "",
   });
 
-  const selectedCar = demoCars.find((car) => car.id === Number(formData.carId));
+  useEffect(() => {
+    async function fetchCars() {
+      try {
+        setCarsLoading(true);
 
+        const response = await carService.getCars();
+
+        setCars(response.data);
+      } catch (error) {
+        console.error("Failed to load cars", error);
+
+        toast.error("Unable to load vehicles");
+      } finally {
+        setCarsLoading(false);
+      }
+    }
+
+    fetchCars();
+  }, []);
+
+  const selectedCar = cars.find((car) => car.id === Number(formData.carId));
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -56,18 +62,47 @@ const CreateTrip = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
+    if (
+      !formData.carId ||
+      !formData.pickup ||
+      !formData.drop ||
+      !formData.distance
+    ) {
+      toast.error("Please fill required fields");
 
-    setTimeout(() => {
-      console.log(formData);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const payload = {
+        carId: Number(formData.carId),
+
+        pickupLocation: formData.pickup,
+
+        dropLocation: formData.drop,
+
+        distanceInKm: Number(formData.distance),
+      };
+
+      console.log("Creating trip:", payload);
+
+      await tripService.createTrip(payload);
 
       toast.success("Trip created successfully");
 
+      navigate("/trips");
+    } catch (error) {
+      console.error("Trip creation failed", error);
+
+      toast.error(error.response?.data?.message || "Unable to create trip");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -107,7 +142,7 @@ p-5
       >
         <TripForm
           formData={formData}
-          cars={demoCars}
+          cars={cars}
           onChange={handleChange}
           onSubmit={handleSubmit}
           loading={loading}

@@ -2,7 +2,7 @@ import { Car, Edit, Trash2, Route } from "lucide-react";
 
 import StatusBadge from "../common/StatusBadge";
 
-function CarCard({ car, onEdit, onDelete }) {
+function CarCard({ car, onEdit, onDelete, onViewTrips }) {
   return (
     <div
       className="
@@ -135,7 +135,7 @@ font-extrabold
 mt-1
 "
           >
-            <h3>{car.tripBookings?.length || 0}</h3>
+            {car.tripBookings?.length || 0}
           </p>
         </div>
       </div>
@@ -218,6 +218,7 @@ gap-2
 text-sm
 font-bold
 "
+          onClick={() => onViewTrips(car.id)}
         >
           <Route size={16} />
           Trips

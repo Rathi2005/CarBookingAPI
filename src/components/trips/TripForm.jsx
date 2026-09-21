@@ -118,8 +118,9 @@ const TripForm = ({ formData, cars, onChange, onSubmit, loading }) => {
             focus:border-blue-500
             "
           >
-            <option value="">Select Vehicle</option>
-
+            <option value="">
+              {cars.length === 0 ? "No vehicles available" : "Select Vehicle"}
+            </option>
             {cars.map((car) => (
               <option key={car.id} value={car.id}>
                 {car.brand} {car.model} - ₹{car.pricePerKm}/km

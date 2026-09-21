@@ -180,10 +180,9 @@ function Trips() {
     .filter((trip) => trip.status === "Active")
     .reduce((total, trip) => total + Number(trip.totalAmount || 0), 0);
 
-  const totalDistance = trips.reduce(
-    (total, trip) => total + Number(trip.distance || 0),
-    0,
-  );
+  const totalDistance = trips
+    .filter((trip) => trip.status !== "Cancelled")
+    .reduce((total, trip) => total + Number(trip.distance || 0), 0);
 
   const completedTrips = trips.filter(
     (trip) => trip.status === "Completed",
@@ -227,13 +226,6 @@ function Trips() {
                 {trips.length}
               </span>
             </button>
-
-            <Link
-              to="/trips/create"
-              className="inline-flex h-11 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[9px] font-bold text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              Create Trip Studio
-            </Link>
 
             <Link
               to="/trips/create"

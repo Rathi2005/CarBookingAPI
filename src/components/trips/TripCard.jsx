@@ -12,7 +12,12 @@ import {
 
 import TripStatusBadge from "./TripStatusBadge";
 
-const TripCard = ({ trip, onComplete, onCancel, loading }) => {
+const TripCard = ({
+  trip = {},
+  onComplete = () => {},
+  onCancel = () => {},
+  loading = {},
+}) => {
   const status = trip.status?.toLowerCase();
 
   const isActive = status === "active";
@@ -20,9 +25,10 @@ const TripCard = ({ trip, onComplete, onCancel, loading }) => {
   const isCompleted = status === "completed";
   const isCancelled = status === "cancelled";
 
-  const isCompleting = loading.id === trip.id && loading.action === "complete";
+  const isCompleting =
+    loading?.id === trip.id && loading?.action === "complete";
 
-  const isCancelling = loading.id === trip.id && loading.action === "cancel";
+  const isCancelling = loading?.id === trip.id && loading?.action === "cancel";
 
   return (
     <article

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCars } from "../../hooks/useCars";
 import { carService } from "../../services/carService";
 import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,58 +15,52 @@ import ConfirmModal from "../../components/common/ConfirmModal";
 
 function Cars() {
   const navigate = useNavigate();
-
-  const [cars, setCars] = useState([]);
-
-  const [filteredCars, setFilteredCars] = useState([]);
-
   const [search, setSearch] = useState("");
-
-  const [loading, setLoading] = useState(true);
 
   const [selectedCar, setSelectedCar] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  async function fetchCars() {
-    try {
-      setLoading(true);
+  const queryClient = useQueryClient();
 
-      const response = await carService.getCars();
+  const { data: cars = [], isLoading, isError } = useCars();
 
-      setCars(response.data);
+  const filteredCars = search.trim()
+    ? cars.filter((car) => {
+        const text = `${car.brand} ${car.model} ${car.year}`.toLowerCase();
 
-      setFilteredCars(response.data);
-    } catch (error) {
-      console.error("Failed to fetch cars", error);
+        return text.includes(search.toLowerCase());
+      })
+    : cars;
 
-      toast.error(error.response?.data?.message || "Unable to load cars");
-    } finally {
-      setLoading(false);
-    }
+  const deleteCarMutation = useMutation({
+    mutationFn: (id) => carService.deleteCar(id),
+
+    onSuccess: () => {
+      toast.success(
+        `${selectedCar.brand} ${selectedCar.model} deleted successfully`,
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ["cars"],
+      });
+
+      setSelectedCar(null);
+      setShowDeleteModal(false);
+    },
+
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Unable to delete car");
+    },
+  });
+
+  function handleViewTrips(carId) {
+    navigate(`/cars/${carId}/trips`);
   }
-
-  useEffect(() => {
-    fetchCars();
-  }, []);
 
   function handleSearch(value) {
     setSearch(value);
-
-    if (!value.trim()) {
-      setFilteredCars(cars);
-
-      return;
-    }
-
-    const result = cars.filter((car) => {
-      const text = `${car.brand} ${car.model} ${car.year}`.toLowerCase();
-
-      return text.includes(value.toLowerCase());
-    });
-
-    setFilteredCars(result);
   }
 
   function openDeleteModal(car) {
@@ -73,36 +69,20 @@ function Cars() {
     setShowDeleteModal(true);
   }
 
-  async function deleteCar() {
-    try {
-      setDeleting(true);
-
-      await carService.deleteCar(selectedCar.id);
-
-      toast.success(
-        `${selectedCar.brand} ${selectedCar.model} deleted successfully`,
-      );
-
-      fetchCars();
-    } catch (error) {
-      console.error("Delete failed", error);
-
-      toast.error(error.response?.data?.message || "Unable to delete car");
-    } finally {
-      setDeleting(false);
-
-      setSelectedCar(null);
-
-      setShowDeleteModal(false);
-    }
-  }
-
   function handleEdit(id) {
     navigate(`/cars/edit/${id}`);
   }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6">
+        <p className="text-red-500">Unable to load cars</p>
+      </div>
+    );
   }
 
   return (
@@ -334,6 +314,7 @@ gap-6
               }}
               onEdit={handleEdit}
               onDelete={() => openDeleteModal(car)}
+              onViewTrips={handleViewTrips}
             />
           ))}
         </div>
@@ -351,7 +332,7 @@ gap-6
           setShowDeleteModal(false);
           setSelectedCar(null);
         }}
-        onConfirm={deleteCar}
+        onConfirm={() => deleteCarMutation.mutate(selectedCar.id)}
       />
     </div>
   );

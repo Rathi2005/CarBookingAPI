@@ -10,6 +10,8 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://0.0.0.0:8080");
+
 // the below functionality helps to ignore the cyclic behaviour of .Include() causing infinite loop
 // eg:- car.Owner => car has owner, owner has cars, then again car has owner and so on.
 builder.Services.AddControllers().AddJsonOptions(options =>

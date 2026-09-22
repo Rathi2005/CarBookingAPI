@@ -38,18 +38,49 @@ namespace CarBookingAPI.Controllers
             return Ok(cars);
         }
 
-        [HttpGet("{id:int}")]
+        //[HttpGet("{id:int}")]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public ActionResult<Car> GetCarById([FromRoute] int id)
+        //{
+        //    if (id <= 0)
+        //    {
+        //        return BadRequest("Invalid car id.");
+        //    }
+
+        //    Car? car = carService.GetCarById(id);
+
+        //    if (car is null)
+        //    {
+        //        return NotFound("Car not found.");
+        //    }
+
+        //    return Ok(car);
+        //}
+
+        [Authorize(Roles = "Owner")]
+        [HttpGet("me/{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Car))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Car> GetCarById([FromRoute] int id)
+        public ActionResult<Car> GetMyCarById([FromRoute] int id)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid car id.");
             }
 
-            Car? car = carService.GetCarById(id);
+            string? ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            List<Car> cars = carService.GetCarsByOwnerId(ownerId);
+            Car? car = cars.FirstOrDefault(c => c.Id == id);
 
             if (car is null)
             {
@@ -74,7 +105,7 @@ namespace CarBookingAPI.Controllers
 
             Car car = carService.AddCar(ownerId, request);
 
-            return CreatedAtAction(nameof(GetCarById), new { id = car.Id }, car);
+            return CreatedAtAction(nameof(GetMyCarById), new { id = car.Id }, car);
         }
 
         [Authorize(Roles = "Owner")]
@@ -127,32 +158,30 @@ namespace CarBookingAPI.Controllers
                 return Unauthorized("Invalid token.");
             }
 
+            List<TripBookingResponse> trips = tripBookingService.GetBookingsByCarId(id);
+            if (trips.Any())
+            {
+                return BadRequest("Cars having trips cannot be deleted.");
+            }
+
             bool deleted = carService.DeleteCar(id, ownerId);
 
-            List<TripBookingResponse> trips = tripBookingService.GetBookingsByCarId(id);
 
             if (!deleted)
             {
                 return NotFound("Car not found.");
             }
 
-            if (trips.Any())
-            {
-                return BadRequest("Cars having trips cannot be deleted.");
-            }
-
-
-
             return Ok("Car deleted successfully.");
         }
-
-        [HttpGet("available")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<List<Car>> GetAvailableCars()
-        {
-            List<Car> availableCars = carService.GetAvailableCars();
-            return Ok(availableCars);
-        }
+    
+        //[HttpGet("available")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //public ActionResult<List<Car>> GetAvailableCars()
+        //{
+        //    List<Car> availableCars = carService.GetAvailableCars();
+        //    return Ok(availableCars);
+        //}
 
         [Authorize(Roles = "Owner")]
         [HttpGet("me/available")]

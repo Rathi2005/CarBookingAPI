@@ -4,8 +4,9 @@ namespace CarBookingAPI.DTOs
 {
     public class CreateTripBookingRequest
     {
-        [Range(1, int.MaxValue, ErrorMessage = "Customer ID must be greater than 0.")]
-        public int CustomerId { get; set; }
+        //[Range(1, int.MaxValue, ErrorMessage = "Customer ID must be greater than 0.")]
+        //public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Car ID must be greater than 0.")]
         public int CarId { get; set; }

@@ -3,7 +3,7 @@
     public class TripBooking
     {
         public int Id { get; set; }
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
         public int CarId { get; set; }
         public string PickupLocation { get; set; }
         public string DropLocation { get; set; }
@@ -14,7 +14,7 @@
 
         // these below fields tells that the tripbooking has a car and a customer 
         // we will define the relationship in the AppDbContext file.
-        public Customer Customer { get; set; } = null!;
+        public Customer? Customer { get; set; } = null!;
         public Car Car { get; set; } = null!;
 
         public TripBooking()

@@ -1,179 +1,195 @@
-I am learning C# OOP and ASP.NET Core Web API in parallel. Please continue teaching me from where I left off.
+Current Learning + Project Status Update
+I am learning C# OOP and ASP.NET Core Web API in parallel.
 
-Teaching style I want:
-- Explain concepts simply first.
-- Use small scenario-based activities.
-- Let me write code.
-- Check my code and explain mistakes clearly.
-- Increase difficulty gradually.
-- Use C# examples only.
-- Prefer practical project-based learning.
-- Do not jump too fast.
-- Give me tasks after explaining.
-- When I send code, review it and suggest improvements.
-- Keep explanations beginner-friendly but accurate.
+Teaching style I want
+Explain concepts simply first.
+Use small scenario-based activities.
+Let me write code.
+Check my code and explain mistakes clearly.
+Increase difficulty gradually.
+Use C# examples only.
+Prefer practical project-based learning.
+Do not jump too fast.
+Give me tasks after explaining.
+When I send code, review it and suggest improvements.
+Keep explanations beginner-friendly but accurate.
+C# OOP topics I have already completed
+Arrays basics and common methods.
+Class and Object.
+Constructor and this keyword.
+Encapsulation using private fields and setter methods.
+Properties using get, set, value, and auto-properties.
+Inheritance using Person, Student, Teacher.
+base(name, age) and parent constructor calls.
+Polymorphism using virtual and override.
+Abstract classes and abstract methods.
+Access modifier basics: private, public, protected.
+Interfaces using IDisplayable.
+Interface implementation does not use override.
+Multiple interfaces using IDisplayable and IPayable.
+Abstract class + interface together.
+Access modifiers deep dive.
+Method overloading.
+Method overriding vs method hiding basics.
+List basics with objects.
+Service class concept.
+Basic project folders: Models and Services.
+ASP.NET Core Web API basics with Controllers and Swagger.
+Dependency Injection basics using AddSingleton.
+DTO/request classes.
+Basic validation manually and then with Data Annotations.
+Service-to-service dependency.
+Status constants using a static class.
+Interfaces for services.
+Dependency Injection lifetimes: AddSingleton, AddScoped, AddTransient.
+Basic EF Core setup and first migration.
+Navigation properties basics.
+Include() and ThenInclude() basics.
+Response DTO basics for cleaner API responses.
+JWT authentication basics.
+Claims-based identity basics.
+Protected endpoints using [Authorize].
+Owner-based report DTO design.
+Important corrections I learned
+Constructor should be public if called from Main or outside the class.
+Static methods cannot access instance fields directly.
+Use instance methods like Display() for object data.
+If using private fields, use properties or methods to access them.
+Auto-property public int Age { get; set; } creates hidden storage.
+Do not create both private int age and public int Age { get; set; } unless the property uses the field.
+Avoid property recursion like get { return Name; } set { Name = value; }.
+Correct full property uses a private field:
+csharp
+private string name;
+public string Name
+{
+    get { return name; }
+    set { name = value; }
+}
+Use protected for parent class data if child classes need access.
+Abstract method has no body and must be overridden by child classes.
+Virtual method has a body and may be overridden.
+base(name, age) calls the parent constructor.
+Interface methods are implemented without override.
+Use override only for abstract/virtual methods from a parent class.
+In C#, a class can inherit from only one class but can implement many interfaces.
+When combining inheritance and interfaces, base class comes first:
+csharp
+public class Teacher : Person, IDisplayable, IPayable
+For method overriding, use virtual in parent and override in child.
+For method hiding, use new, but it is not true runtime polymorphism.
+Use int.TryParse instead of Convert.ToInt32 when validating console input.
+Use string.IsNullOrWhiteSpace to validate text input manually.
+In Web API, services should return data/status/results, controllers should return HTTP responses.
+Use [HttpPut("{id:int}")] not [HttpPut("{id : int}")].
+Prefer [FromBody] for request body.
+Prefer clear variable names like updated, deleted, owner, customer, booking.
+Return BadRequest for invalid route IDs.
+Return NotFound when service cannot find data.
+Return CreatedAtAction for POST create endpoints.
+Use ActionResult<T> in controllers.
+Interface implementation does not use override.
+With [ApiController], Data Annotation validation can automatically return 400 Bad Request.
+Route values like id still need manual validation.
+Data Annotations can validate format/range, but cannot check if related data exists.
+Business validation like “owner exists”, “car is available”, “customer exists” stays in controller/service logic.
+Car availability should not be manually updated through normal car update anymore.
+Car availability should change through booking actions:
+Create booking -> IsAvailable = false
+Cancel booking -> IsAvailable = true
+Complete booking -> IsAvailable = true
+AddSingleton is okay only for current in-memory lists.
+EF Core DbContext uses scoped lifetime.
+Services using AppDbContext should be registered with AddScoped.
+Do not inject scoped service into singleton service.
+Once a service is registered as interface mapping, inject the interface, not the concrete class:
+csharp
+builder.Services.AddScoped<IOwnerService, OwnerService>();
+public OwnersController(IOwnerService ownerService)
+Include() is used to load related data.
+ThenInclude() is used to load related data of related data.
+Response DTOs help avoid returning full EF entities directly.
+Response DTOs make API responses cleaner and safer for frontend use.
+For fast delivery, focus on one vertical slice end-to-end instead of building many incomplete roles/features.
+Version 1 will be owner-authenticated and owner-operated.
+In Version 1, the owner will manually enter trip details.
+Daily/monthly trip reports and earnings are now a top priority for release.
+Authentication should happen before authorization:
+csharp
+app.UseAuthentication();
+app.UseAuthorization();
+JWT token claims can be used to identify the logged-in owner.
+Owner-specific endpoints should use token-based identity instead of requiring owner id manually in route when possible.
+Controller access control and service logic are different concerns.
+Even if multiple endpoints use the same service logic, non-essential routes can still be disabled while keeping shared service methods.
+Authorization alone is not enough; ownership checks are also required.
+Broad routes can expose another owner’s data if ownership is not verified.
+For Version 1, prefer /me owner-specific routes instead of generic/global routes where possible.
+When a model changes, create a new migration and update the database instead of recreating the entire database from zero.
+.NET setup
+Editor: Visual Studio
+Operating System: Windows
+Application type: ASP.NET Core Web API using Controllers and Swagger
+Database for local development: SQL Server LocalDB
+SQL Server instance verified
+text
+(localdb)\MSSQLLocalDB
+SSMS is installed and working.
+EF Core packages installed
+Microsoft.EntityFrameworkCore.SqlServer
 
-C# OOP topics I have already completed:
-1. Arrays basics and common methods.
-2. Class and Object.
-3. Constructor and this keyword.
-4. Encapsulation using private fields and setter methods.
-5. Properties using get, set, value, and auto-properties.
-6. Inheritance using Person, Student, Teacher.
-7. base(name, age) and parent constructor calls.
-8. Polymorphism using virtual and override.
-9. Abstract classes and abstract methods.
-10. Access modifier basics: private, public, protected.
-11. Interfaces using IDisplayable.
-12. Interface implementation does not use override.
-13. Multiple interfaces using IDisplayable and IPayable.
-14. Abstract class + interface together.
-15. Access modifiers deep dive.
-16. Method overloading.
-17. Method overriding vs method hiding basics.
-18. List<T> basics with objects.
-19. Service class concept.
-20. Basic project folders: Models and Services.
-21. ASP.NET Core Web API basics with Controllers and Swagger.
-22. Dependency Injection basics using AddSingleton.
-23. DTO/request classes.
-24. Basic validation manually and then with Data Annotations.
-25. Service-to-service dependency.
-26. Status constants using a static class.
-27. Interfaces for services.
-28. Dependency Injection lifetimes: AddSingleton, AddScoped, AddTransient.
-29. Basic EF Core setup and first migration.
-30. Navigation properties basics.
-31. Include() and ThenInclude() basics.
-32. Response DTO basics for cleaner API responses.
-33. JWT authentication basics.
-34. Claims-based identity basics.
-35. Protected endpoints using [Authorize].
-36. Owner-based report DTO design.
+Microsoft.EntityFrameworkCore.Tools
 
-Important corrections I learned:
-- Constructor should be public if called from Main or outside the class.
-- Static methods cannot access instance fields directly.
-- Use instance methods like Display() for object data.
-- If using private fields, use properties or methods to access them.
-- Auto-property public int Age { get; set; } creates hidden storage.
-- Do not create both private int age and public int Age { get; set; } unless the property uses the field.
-- Avoid property recursion like get { return Name; } set { Name = value; }.
-- Correct full property uses a private field:
-  private string name;
-  public string Name
-  {
-      get { return name; }
-      set { name = value; }
-  }
-- Use protected for parent class data if child classes need access.
-- Abstract method has no body and must be overridden by child classes.
-- Virtual method has a body and may be overridden.
-- base(name, age) calls the parent constructor.
-- Interface methods are implemented without override.
-- Use override only for abstract/virtual methods from a parent class.
-- In C#, a class can inherit from only one class but can implement many interfaces.
-- When combining inheritance and interfaces, base class comes first:
-  public class Teacher : Person, IDisplayable, IPayable
-- For method overriding, use virtual in parent and override in child.
-- For method hiding, use new, but it is not true runtime polymorphism.
-- Use int.TryParse instead of Convert.ToInt32 when validating console input.
-- Use string.IsNullOrWhiteSpace to validate text input manually.
-- In Web API, services should return data/status/results, controllers should return HTTP responses.
-- Use [HttpPut("{id:int}")] not [HttpPut("{id : int}")].
-- Prefer [FromBody] for request body.
-- Prefer clear variable names like updated, deleted, owner, customer, booking.
-- Return BadRequest for invalid route IDs.
-- Return NotFound when service cannot find data.
-- Return CreatedAtAction for POST create endpoints.
-- Use ActionResult<T> in controllers.
-- Interface implementation does not use override.
-- With [ApiController], Data Annotation validation can automatically return 400 Bad Request.
-- Route values like id still need manual validation.
-- Data Annotations can validate format/range, but cannot check if related data exists.
-- Business validation like “owner exists”, “car is available”, “customer exists” stays in controller/service logic.
-- Car availability should not be manually updated through normal car update anymore.
-- Car availability should change through booking actions:
-  Create booking -> IsAvailable = false
-  Cancel booking -> IsAvailable = true
-  Complete booking -> IsAvailable = true
-- AddSingleton is okay only for current in-memory lists.
-- EF Core DbContext uses scoped lifetime.
-- Services using AppDbContext should be registered with AddScoped.
-- Do not inject scoped service into singleton service.
-- Once a service is registered as interface mapping, inject the interface, not the concrete class:
-  builder.Services.AddScoped<IOwnerService, OwnerService>();
-  public OwnersController(IOwnerService ownerService)
-- Include() is used to load related data.
-- ThenInclude() is used to load related data of related data.
-- Response DTOs help avoid returning full EF entities directly.
-- Response DTOs make API responses cleaner and safer for frontend use.
-- For fast delivery, focus on one vertical slice end-to-end instead of building many incomplete roles/features.
-- Version 1 will be owner-authenticated and owner-operated.
-- In Version 1, the owner will manually enter trip details.
-- Daily/monthly trip reports and earnings are now a top priority for release.
-- Authentication should happen before authorization:
-  app.UseAuthentication();
-  app.UseAuthorization();
-- JWT token claims can be used to identify the logged-in owner.
-- Owner-specific endpoints should use token-based identity instead of requiring owner id manually in route when possible.
+Microsoft.EntityFrameworkCore.Design
 
-.NET setup:
-- Editor: Visual Studio
-- Operating System: Windows
-- Application type: ASP.NET Core Web API using Controllers and Swagger
-- Database: SQL Server LocalDB
-- SQL Server instance verified:
-  (localdb)\MSSQLLocalDB
-- SSMS is installed and working.
-- EF Core packages installed:
-  Microsoft.EntityFrameworkCore.SqlServer
-  Microsoft.EntityFrameworkCore.Tools
-  Microsoft.EntityFrameworkCore.Design
-- Authentication: implemented for Owner using JWT
-- Authorization: started using [Authorize]
-- Async/await: not yet
-- Current focus is still synchronous for faster Version 1 delivery
+Authentication: implemented for Owner using JWT
 
-Current real project:
-Project name:
-CarBookingAPI
+Authorization: implemented and used with [Authorize]
 
-Important clarification:
+Async/await: not yet
+
+Current focus is still synchronous for faster Version 1 delivery
+
+Current real project
+Project name: CarBookingAPI
+
+Important clarification
 Although project name is CarBookingAPI, the long-term idea is a trip booking platform.
+
 However, for fast delivery, the current product direction is a vertical slice MVP focused on owner operations first.
 
-Version 1 product direction:
-- Only Owner role is active.
-- Owner registers/login.
-- Owner manages own cars.
-- Owner manually enters trip details.
-- Owner views trip history and earnings reports.
-- Customer role is postponed for later versions.
-- Driver role is postponed for later versions.
-- Admin role is postponed for later versions.
+Version 1 product direction
+Only Owner role is active.
+Owner registers/login.
+Owner manages own cars.
+Owner manually enters trip details.
+Owner views trip history and earnings reports.
+Customer role is postponed for later versions.
+Driver role is postponed for later versions.
+Admin role is postponed for later versions.
+Main entities currently in project
+Owner
+Car
+Customer
+TripBooking
+Important temporary business decision
+Customer entity may still exist in the project/database, but Version 1 does not depend on customer login flow.
 
-Main entities currently in project:
-1. Owner
-2. Car
-3. Customer
-4. TripBooking
+In Version 1, trip details are entered manually by the owner after login.
 
-Important temporary business decision:
-- Customer entity may still exist in the project/database, but Version 1 does not depend on customer login flow.
-- In Version 1, trip details are entered manually by the owner after login.
-- This means the system behaves more like an owner trip-record and earnings management API in the first release.
-- Later versions can evolve this into a full customer booking platform.
+This means the system behaves more like an owner trip-record and earnings management API in the first release.
 
-Relationship idea:
-- Owner owns/registers cars.
-- Car has OwnerId.
-- Customer does not connect directly to Car.
-- Customer connects to Car through TripBooking.
-- TripBooking has CustomerId and CarId.
-- For Version 1, owner-based reporting is a key use case.
+Later versions can evolve this into a full customer booking platform.
 
-Current folder structure:
+Relationship idea
+Owner owns/registers cars.
+Car has OwnerId.
+Customer does not connect directly to Car.
+Customer connects to Car through TripBooking.
+TripBooking has CustomerId and CarId.
+For Version 1, owner-based reporting is a key use case.
+Current folder structure
+text
 CarBookingAPI
 │
 ├── Controllers
@@ -200,7 +216,8 @@ CarBookingAPI
 │   ├── TripBookingResult.cs
 │   ├── TripBookingResponse.cs
 │   ├── OwnerDailyReportResponse.cs
-│   └── OwnerMonthlyReportResponse.cs
+│   ├── OwnerMonthlyReportResponse.cs
+│   └── OwnerDashboardResponse.cs
 │
 ├── Interfaces
 │   ├── IAuthService.cs
@@ -228,444 +245,461 @@ CarBookingAPI
 ├── appsettings.json
 ├── appsettings.Development.json
 └── CarBookingAPI.csproj
+DTO cleanup is done
+DTO/request/result classes moved from Models folder to DTOs folder.
+Namespace changed from CarBookingAPI.Models to CarBookingAPI.DTOs.
+Controllers/services/interfaces updated with:
+csharp
+using CarBookingAPI.DTOs;
+using CarBookingAPI.Models;
+Project runs after DTO cleanup.
+Current model details
+Car model
+Id
+OwnerId
+Brand
+Model
+Year
+PricePerKm
+IsAvailable
+Notes:
 
-DTO cleanup is done:
-- DTO/request/result classes moved from Models folder to DTOs folder.
-- Namespace changed from CarBookingAPI.Models to CarBookingAPI.DTOs.
-- Controllers/services/interfaces updated with:
-  using CarBookingAPI.DTOs;
-  using CarBookingAPI.Models;
-- Project runs after DTO cleanup.
+Empty constructor added or should be added for EF Core if needed.
+Constructor/default should ensure IsAvailable = true.
+Navigation property planned or added:
 
-Current model details:
+Owner? Owner
+List<TripBooking> TripBookings
+Owner model
+Id
+Name
+PhoneNumber
+Email
+PasswordHash
+Notes:
 
-Car model:
-- Id
-- OwnerId
-- Brand
-- Model
-- Year
-- PricePerKm
-- IsAvailable
-- Empty constructor added or should be added for EF Core if needed.
-- Constructor/default should ensure IsAvailable = true.
-- Navigation property planned or added:
-  - Owner? Owner
-  - List<TripBooking> TripBookings
+Empty constructor added or should be added for EF Core.
+Parameter constructor may still exist.
+Navigation property planned or added:
 
-Owner model:
-- Id
-- Name
-- PhoneNumber
-- Email
-- PasswordHash
-- Empty constructor added or should be added for EF Core.
-- Parameter constructor may still exist.
-- Navigation property planned or added:
-  - List<Car> Cars
-- Current auth implementation is Path A:
-  - auth is temporarily stored in Owner table
-  - generic auth DTO names are used
-  - implementation is owner-only for Version 1
+List<Car> Cars
+Current auth implementation is Path A:
 
-Customer model:
-- Id
-- Name
-- PhoneNumber
-- Email
-- Empty constructor added or should be added for EF Core.
-- Parameter constructor may still exist.
-- Navigation property planned or added:
-  - List<TripBooking> TripBookings
-- Customer role is not part of Version 1 release scope.
+auth is temporarily stored in Owner table
+generic auth DTO names are used
+implementation is owner-only for Version 1
+Customer model
+Id
+Name
+PhoneNumber
+Email
+Notes:
 
-TripBooking model:
-- Id
-- CustomerId
-- CarId
-- PickupLocation
-- DropLocation
-- DistanceInKm
-- TotalPrice
-- BookingDate
-- Status
-- Empty constructor added or should be added for EF Core if needed.
-- Constructor previously set:
-  BookingDate = DateTime.Now
-  Status = TripBookingStatus.Active
-- Navigation properties planned or added:
-  - Customer? Customer
-  - Car? Car
+Empty constructor added or should be added for EF Core.
+Parameter constructor may still exist.
+Navigation property planned or added:
 
-TripBookingStatus static class:
+List<TripBooking> TripBookings
+Customer role is not part of Version 1 release scope.
+
+TripBooking model
+Id
+CustomerId is now optional for Version 1
+CarId
+PickupLocation
+DropLocation
+DistanceInKm
+TotalPrice
+BookingDate
+Status
+Important update:
+
+CustomerId has been changed to nullable for Version 1 owner-operated trip entry.
+Customer is optional during booking creation in Version 1.
+This change keeps future customer-booking expansion possible.
+Notes:
+
+Empty constructor added or should be added for EF Core if needed.
+Constructor previously set:
+BookingDate = DateTime.Now
+Status = TripBookingStatus.Active
+Navigation properties planned or added:
+
+Customer? Customer
+Car? Car
+TripBookingStatus static class
+csharp
 public static class TripBookingStatus
 {
     public const string Active = "Active";
     public const string Cancelled = "Cancelled";
     public const string Completed = "Completed";
 }
+DTO/request/response classes
+CreateCarRequest
+Current target Version 1 shape:
 
-DTO/request/response classes:
+Brand
+Model
+Year
+PricePerKm
+Important update:
 
-CreateCarRequest:
-- OwnerId
-- Brand
-- Model
-- Year
-- PricePerKm
+OwnerId should be removed for owner-authenticated flow.
+Owner should come from JWT claim, not request body.
+UpdateCarRequest
+Current target Version 1 shape:
 
-UpdateCarRequest:
-- OwnerId
-- Brand
-- Model
-- Year
-- PricePerKm
-
+Brand
+Model
+Year
+PricePerKm
 Important:
-IsAvailable was removed from UpdateCarRequest so users cannot manually change availability from normal car update.
 
-CreateOwnerRequest:
-- Name
-- PhoneNumber
-- Email
+OwnerId should be removed.
+IsAvailable was removed so users cannot manually change availability from normal car update.
+CreateOwnerRequest
+Name
+PhoneNumber
+Email
+UpdateOwnerRequest
+Name
+PhoneNumber
+Email
+CreateCustomerRequest
+Name
+PhoneNumber
+Email
+UpdateCustomerRequest
+Name
+PhoneNumber
+Email
+CreateTripBookingRequest
+Current Version 1 shape:
 
-UpdateOwnerRequest:
-- Name
-- PhoneNumber
-- Email
-
-CreateCustomerRequest:
-- Name
-- PhoneNumber
-- Email
-
-UpdateCustomerRequest:
-- Name
-- PhoneNumber
-- Email
-
-CreateTripBookingRequest:
-- CustomerId
-- CarId
-- PickupLocation
-- DropLocation
-- DistanceInKm
-
+CustomerId is now optional
+CarId
+PickupLocation
+DropLocation
+DistanceInKm
 Important Version 1 note:
-- The long-term system supports customer-based booking.
-- But in Version 1, the owner manually enters trip details.
-- If needed, this request model may later be adjusted or extended for owner-operated trip entry flow.
 
-RegisterRequest:
-- Name
-- PhoneNumber
-- Email
-- Password
-
-LoginRequest:
-- Email
-- Password
-
-AuthResponse:
-- Token
-- UserId
-- Role
-- Name
-- Email
-
-TotalPrice is NOT sent by user.
-It is calculated by system:
-TotalPrice = DistanceInKm * car.PricePerKm
-
-TripBookingResult:
-- Success
-- Message
-- Booking
-
-TripBookingResponse:
-- Used for GET all bookings
-- Used for GET booking by id
-- Used for booking history endpoints
-- Used for owner-authenticated trip history too
-- Returns cleaner API response data instead of full EF entity graph
-- Includes useful related data such as customer name, car info, and owner name as needed
-
-OwnerDailyReportResponse:
-- OwnerId
-- Date
-- TotalTrips
-- CompletedTrips
-- CancelledTrips
-- TotalEarnings
-- List<TripBookingResponse> Trips
-
-OwnerMonthlyReportResponse:
-- OwnerId
-- Year
-- Month
-- TotalTrips
-- CompletedTrips
-- CancelledTrips
-- TotalEarnings
-- List<TripBookingResponse> Trips
-
-Validation stage:
+The long-term system supports customer-based booking.
+But in Version 1, the owner manually enters trip details.
+CustomerId is now optional to support owner-operated trip creation without requiring customer flow.
+Owner must only create bookings using their own cars.
+RegisterRequest
+Name
+PhoneNumber
+Email
+Password
+LoginRequest
+Email
+Password
+AuthResponse
+Token
+UserId
+Role
+Name
+Email
+TripBookingResult
+Success
+Message
+Booking
+TripBookingResponse
+Used for GET all bookings
+Used for GET booking by id
+Used for booking history endpoints
+Used for owner-authenticated trip history too
+Returns cleaner API response data instead of full EF entity graph
+Includes useful related data such as customer name, car info, and owner name as needed
+OwnerDailyReportResponse
+OwnerId
+Date
+TotalTrips
+CompletedTrips
+CancelledTrips
+TotalEarnings
+List Trips
+OwnerMonthlyReportResponse
+OwnerId
+Year
+Month
+TotalTrips
+CompletedTrips
+CancelledTrips
+TotalEarnings
+List Trips
+OwnerDashboardResponse
+OwnerId
+TotalCars
+AvailableCars
+TotalTrips
+ActiveTrips
+CompletedTrips
+CancelledTrips
+TotalEarnings
+Validation stage
 Data Annotation validation is already done.
 
-Customer DTO validation:
-- [Required]
-- [StringLength]
-- [EmailAddress]
+Customer DTO validation
+[Required]
+[StringLength]
+[EmailAddress]
+Owner DTO validation
+[Required]
+[StringLength]
+[EmailAddress]
+Car DTO validation
+Current Version 1 direction:
 
-Owner DTO validation:
-- [Required]
-- [StringLength]
-- [EmailAddress]
+[Required], [StringLength] for Brand
+[Required], [StringLength] for Model
+[Range] for Year
+[Range] for PricePerKm
+Important:
 
-Car DTO validation:
-- [Range] for OwnerId
-- [Required], [StringLength] for Brand
-- [Required], [StringLength] for Model
-- [Range] for Year
-- [Range] for PricePerKm
-
-TripBooking DTO validation:
-- [Range] for CustomerId
-- [Range] for CarId
-- [Required], [StringLength] for PickupLocation
-- [Required], [StringLength] for DropLocation
-- [Range] for DistanceInKm
-
-Register/Login DTO validation:
-- [Required]
-- [EmailAddress] for email
-- [StringLength] for password/name where used
-
+validation for OwnerId should be removed once owner-authenticated car flow is finalized.
+TripBooking DTO validation
+CustomerId is now optional in Version 1
+[Range] for CarId
+[Required], [StringLength] for PickupLocation
+[Required], [StringLength] for DropLocation
+[Range] for DistanceInKm
+Register/Login DTO validation
+[Required]
+[EmailAddress] for email
+[StringLength] for password/name where used
 Manual validation removed from controllers for request body where Data Annotations are used.
+
 Still keeping:
-- Route ID validation like id <= 0
-- Business validation like owner/customer/car exists
-- Car availability check
-- Token/claim validation where needed for owner-authenticated endpoints
 
-Current interfaces:
+Route ID validation like id <= 0
+Business validation like owner/customer/car exists where appropriate
+Car availability check
+Token/claim validation where needed for owner-authenticated endpoints
+Current interfaces
+IAuthService
+csharp
+AuthResponse? Register(RegisterRequest request)
+AuthResponse? Login(LoginRequest request)
+ICarService
+Current target Version 1 direction:
 
-IAuthService:
-- AuthResponse? Register(RegisterRequest request)
-- AuthResponse? Login(LoginRequest request)
+csharp
+List<Car> GetAllCars()
+Car? GetCarById(int id)
+List<Car> GetAvailableCars()
+List<Car> GetCarsByOwnerId(int ownerId)
+List<Car> GetAvailableCarsByOwnerId(int ownerId)
+Car AddCar(int ownerId, CreateCarRequest request)
+Car? UpdateCar(int id, int ownerId, UpdateCarRequest request)
+bool DeleteCar(int id, int ownerId)
+bool SetCarAvailability(int carId, bool isAvailable)
+IOwnerService
+csharp
+List<Owner> GetAllOwners()
+Owner? GetOwnerById(int id)
+Owner AddOwner(CreateOwnerRequest request)
+Owner? UpdateOwner(int id, UpdateOwnerRequest request)
+bool DeleteOwner(int id)
+ICustomerService
+csharp
+List<Customer> GetAllCustomers()
+Customer? GetCustomerById(int id)
+Customer AddCustomer(CreateCustomerRequest request)
+Customer? UpdateCustomer(int id, UpdateCustomerRequest request)
+bool DeleteCustomer(int id)
+ITripBookingService
+Current target Version 1 direction:
 
-ICarService:
-- May still be in-memory or may be next for EF Core conversion.
-- Methods:
-  - List<Car> GetAllCars()
-  - Car? GetCarById(int id)
-  - List<Car> GetAvailableCars()
-  - List<Car> GetCarsByOwnerId(int ownerId)
-  - Car AddCar(CreateCarRequest request)
-  - Car? UpdateCar(int id, UpdateCarRequest request)
-  - bool DeleteCar(int id)
-  - bool SetCarAvailability(int carId, bool isAvailable)
+csharp
+List<TripBookingResponse> GetAllBookingResponses()
+TripBookingResponse? GetBookingResponseById(int id)
+TripBookingResult CreateBooking(int ownerId, CreateTripBookingRequest request)
+TripBookingResult CancelBooking(int id, int ownerId)
+TripBookingResult CompleteBooking(int id, int ownerId)
+List<TripBookingResponse> GetBookingsByCustomerId(int customerId)
+List<TripBookingResponse> GetBookingsByCarId(int carId)
+List<TripBookingResponse> GetOwnersBooking(int ownerId)
+OwnerDailyReportResponse GetDailyReportByOwnerId(int ownerId, DateTime date)
+OwnerMonthlyReportResponse GetMonthlyReportByOwnerId(int ownerId, int year, int month)
+OwnerDashboardResponse GetDashboardByOwnerId(int ownerId)
+Current services status
+AuthService
+Completed:
 
-IOwnerService:
-- List<Owner> GetAllOwners()
-- Owner? GetOwnerById(int id)
-- Owner AddOwner(CreateOwnerRequest request)
-- Owner? UpdateOwner(int id, UpdateOwnerRequest request)
-- bool DeleteOwner(int id)
+Added
+Handles register and login
+Uses AppDbContext and IConfiguration
+Stores hashed password in Owner.PasswordHash
+Verifies hashed password during login
+Generates JWT token with claims:
+NameIdentifier
+Name
+Email
+Role = Owner
+OwnerService
+Completed:
 
-ICustomerService:
-- List<Customer> GetAllCustomers()
-- Customer? GetCustomerById(int id)
-- Customer AddCustomer(CreateCustomerRequest request)
-- Customer? UpdateCustomer(int id, UpdateCustomerRequest request)
-- bool DeleteCustomer(int id)
+Fully converted to EF Core
+Uses AppDbContext
+No longer uses List<Owner>
+No longer uses nextOwnerId
+Owner IDs are generated by SQL Server
+Tested and working
+Owner saved from Swagger and verified in dbo.Owners table in SSMS
+CustomerService
+Completed or near-complete:
 
-ITripBookingService:
-- GET methods use TripBookingResponse DTO
-- Create/cancel/complete still use TripBookingResult
-- History methods also use TripBookingResponse DTO
-- Daily report added
-- Monthly report added
-- Current shape is approximately:
-  - List<TripBookingResponse> GetAllBookings()
-  - TripBookingResponse? GetBookingById(int id)
-  - TripBookingResult CreateBooking(CreateTripBookingRequest request)
-  - TripBookingResult CancelBooking(int id)
-  - TripBookingResult CompleteBooking(int id)
-  - List<TripBookingResponse> GetBookingsByCustomerId(int customerId)
-  - List<TripBookingResponse> GetBookingsByCarId(int carId)
-  - List<TripBookingResponse> GetBookingsByOwnerId(int ownerId)
-  - OwnerDailyReportResponse GetDailyReportByOwnerId(int ownerId, DateTime date)
-  - OwnerMonthlyReportResponse GetMonthlyReportByOwnerId(int ownerId, int year, int month)
+Converted or intended to be converted to EF Core
+Uses AppDbContext
+No List<Customer>
+No nextCustomerId
+Uses context.Customers
+Customer IDs generated by SQL Server
+Customer logic is lower priority for Version 1 release
+Customer APIs are not part of active Version 1 release scope
+CarService
+Current status:
 
-Current services status:
+Converted or being finalized toward EF Core and owner-based flow
+Should use AppDbContext and context.Cars
+AddCar should not manually assign Id
+Should use ownerId from token flow
+Should set IsAvailable = true by default
+GetCarsByOwnerId should use Where(...).ToList()
+GetAvailableCarsByOwnerId is part of the owner-specific Version 1 flow
+SetCarAvailability should update DB and SaveChanges()
+Must be registered as AddScoped once fully EF Core-based
+TripBookingService
+Completed or strongly progressed:
 
-AuthService:
-- Added.
-- Handles register and login.
-- Uses AppDbContext and IConfiguration.
-- Stores hashed password in Owner.PasswordHash.
-- Verifies hashed password during login.
-- Generates JWT token with claims:
-  - NameIdentifier
-  - Name
-  - Email
-  - Role = Owner
+Uses AppDbContext
+Uses Include() and ThenInclude()
+GetAllBookings-style responses use TripBookingResponse DTO
+GetBookingById-style responses use TripBookingResponse DTO
+Booking history endpoints by customer/car/owner return TripBookingResponse DTO
+CreateBooking uses business rules:
+Customer is optional in Version 1
+If CustomerId is provided, customer should exist
+Car must exist
+Car must be available
+Car must belong to logged-in owner in Version 1 flow
+Distance must be valid
+TotalPrice = DistanceInKm * car.PricePerKm
+Booking is saved
+Car availability becomes false
+CancelBooking:
+Only active booking can be cancelled
+Status becomes Cancelled
+Car becomes available again
+Logged-in owner should only cancel bookings of own cars
+CompleteBooking:
+Only active booking can be completed
+Status becomes Completed
+Car becomes available again
+Logged-in owner should only complete bookings of own cars
+Owner daily report implemented
+Owner monthly report implemented
+Owner dashboard summary method added
+Earnings rule:
+Completed trips count in earnings
+Cancelled trips do not count
+Active trips typically do not count in earnings
+Current APIs documented
+Auth API
+Register
+Login
+Auth me
+Owners API
+Active Version 1 direction:
 
-OwnerService:
-- Fully converted to EF Core.
-- Uses AppDbContext.
-- No longer uses List<Owner>.
-- No longer uses nextOwnerId.
-- Owner IDs are generated by SQL Server.
-- Tested and working.
-- Owner saved from Swagger and verified in dbo.Owners table in SSMS.
+Get my trips
+Get my daily report
+Get my monthly report
+Generic owner CRUD endpoints are non-essential for Version 1 and should be disabled/restricted.
 
-CustomerService:
-- Converted or intended to be converted to EF Core.
-- Uses or should use AppDbContext.
-- No List<Customer>.
-- No nextCustomerId.
-- Uses context.Customers.
-- Customer IDs generated by SQL Server.
-- Customer logic is lower priority for Version 1 release.
+Cars API
+Current target Version 1 owner flow:
 
-CarService:
-- May still be in-memory or may be the next service to convert.
-- If not yet converted:
-  - Remove List<Car> and nextCarId.
-  - Use AppDbContext and context.Cars.
-  - AddCar should not manually assign Id.
-  - Set IsAvailable = true by default.
-  - GetCarsByOwnerId should use Where(...).ToList().
-  - SetCarAvailability should update DB and SaveChanges().
-  - Register as AddScoped after EF Core conversion.
+Get my cars
+Get my car by id
+Get my available cars
+Create car
+Update car
+Delete car
+Broad/global car routes are being restricted or replaced with owner-specific routes.
 
-TripBookingService:
-- Uses AppDbContext.
-- Uses Include() and ThenInclude().
-- GetAllBookings() loads related data using Include and returns TripBookingResponse DTO list.
-- GetBookingById(int id) loads related data and returns TripBookingResponse DTO.
-- Booking history endpoints by customer/car/owner also return TripBookingResponse DTO.
-- CreateBooking uses business rules:
-  - Customer must exist
-  - Car must exist
-  - Car must be available
-  - Distance must be valid
-  - TotalPrice = DistanceInKm * car.PricePerKm
-  - Booking is saved
-  - Car availability becomes false
-- CancelBooking:
-  - Only active booking can be cancelled
-  - Status becomes Cancelled
-  - Car becomes available again
-- CompleteBooking:
-  - Only active booking can be completed
-  - Status becomes Completed
-  - Car becomes available again
-- Owner daily report implemented
-- Owner monthly report implemented
-- Earnings rule:
-  - Completed trips count in earnings
-  - Cancelled trips do not count
-  - Active trips typically do not count in earnings
+Customers API
+Customer entity may remain in database
+Customer APIs are non-essential for Version 1
+Customer CRUD endpoints should be disabled/restricted in Version 1
+TripBookings API
+Version 1 direction:
 
-Current APIs documented:
-
-Auth API:
-POST /api/auth/register
-POST /api/auth/login
-GET /api/auth/me
-
-Owners API:
-GET /api/owners
-GET /api/owners/{id}
-POST /api/owners
-PUT /api/owners/{id}
-DELETE /api/owners/{id}
-GET /api/owners/me/trips
-GET /api/owners/me/reports/daily?date=YYYY-MM-DD
-GET /api/owners/me/reports/monthly?year=YYYY&month=MM
-
-Cars API:
-GET /api/cars
-GET /api/cars/{id}
-GET /api/cars/available
-GET /api/cars/owner/{ownerId}
-POST /api/cars
-PUT /api/cars/{id}
-DELETE /api/cars/{id}
-
-Customers API:
-GET /api/customers
-GET /api/customers/{id}
-POST /api/customers
-PUT /api/customers/{id}
-DELETE /api/customers/{id}
-
-TripBookings API:
-GET /api/tripbookings
-GET /api/tripbookings/{id}
-POST /api/tripbookings
-PUT /api/tripbookings/{id}/cancel
-PUT /api/tripbookings/{id}/complete
-GET /api/tripbookings/customer/{customerId}
-GET /api/tripbookings/owner/{ownerId}
-GET /api/tripbookings/car/{carId}
-
-Auth/report behavior already tested:
-- Register works
-- Login works
-- JWT token returned
-- /api/auth/me works
-- /api/owners/me/trips works using logged-in owner claim
-- Daily report works
-- Monthly report works
-
-TripBookings API current response status:
-- Main GET endpoints use TripBookingResponse DTO
-- History endpoints use TripBookingResponse DTO
-- Create/cancel/complete use TripBookingResult
-- Route ID validation still returns BadRequest for invalid IDs
-- Missing records still return NotFound where appropriate
-
-History/report endpoint behavior:
-- Invalid route/query input should return BadRequest where appropriate
-- Non-existing owner/customer/car returns 404 Not Found where applicable
-- Existing owner/customer/car with no bookings returns 200 OK with empty list/report
-- Earnings should sum completed trips only
-
-TripBookingResult behavior:
-- Wrong customer ID returns 400 Bad Request: Customer not found.
-- Wrong car ID returns 400 Bad Request: Car not found.
-- Booking same car twice returns 400 Bad Request: Car is not available.
-- Completing active booking returns 200 OK with updated booking status Completed.
-- Cancelling completed booking returns 400 Bad Request: Only active bookings can be cancelled.
-- Completing non-existing booking returns 404 Not Found: Booking not found.
-- Cancelling non-existing booking returns 404 Not Found: Booking not found.
-
-EF Core setup already completed:
-1. SQL Server instance verified:
-   (localdb)\MSSQLLocalDB
-2. EF Core packages installed.
-3. Data/AppDbContext.cs created.
-4. appsettings.json connection string added.
-5. Program.cs registers AppDbContext.
-6. Build successful.
-7. Migration created:
-   Add-Migration InitialCreate
-8. Database created:
-   Update-Database
-9. Tables created:
-   dbo.Owners
-   dbo.Cars
-   dbo.Customers
-   dbo.TripBookings
-   dbo.__EFMigrationsHistory
-10. Additional migration added for Owner.PasswordHash.
-11. Database updated successfully for auth support.
-
-AppDbContext code:
+Create booking
+Cancel booking
+Complete booking
+Owner trip history/report endpoints remain key
+Broad/global booking read routes are being reviewed for restriction where needed
+Auth/report behavior already tested
+Register works
+Login works
+JWT token returned
+/api/auth/me works
+/api/owners/me/trips works using logged-in owner claim
+Daily report works
+Monthly report works
+TripBookings API current response status
+Main GET endpoints use TripBookingResponse DTO
+History endpoints use TripBookingResponse DTO
+Create/cancel/complete use TripBookingResult
+Route ID validation still returns BadRequest for invalid IDs
+Missing records still return NotFound where appropriate
+Updated history/report endpoint behavior
+Invalid route/query input should return BadRequest where appropriate
+Non-existing owner/customer/car returns 404 Not Found where applicable
+Existing owner/customer/car with no bookings returns 200 OK with empty list/report
+Earnings should sum completed trips only
+Updated TripBookingResult behavior
+Wrong optional customer ID should return 400 Bad Request: Customer not found. only if customer id was actually sent
+Wrong car ID returns 400 Bad Request: Car not found.
+Booking same car twice returns 400 Bad Request: Car is not available.
+Booking another owner’s car should fail in Version 1 owner flow
+Completing active booking returns 200 OK with updated booking status Completed
+Cancelling completed booking returns 400 Bad Request: Only active bookings can be cancelled.
+Completing non-existing booking returns 404 Not Found: Booking not found.
+Cancelling non-existing booking returns 404 Not Found: Booking not found.
+EF Core setup already completed
+SQL Server instance verified
+text
+(localdb)\MSSQLLocalDB
+EF Core packages installed.
+Data/AppDbContext.cs created.
+appsettings.json connection string added.
+Program.cs registers AppDbContext.
+Build successful.
+Migration created
+powershell
+Add-Migration InitialCreate
+Database created
+powershell
+Update-Database
+Tables created
+dbo.Owners
+dbo.Cars
+dbo.Customers
+dbo.TripBookings
+dbo.__EFMigrationsHistory
+Additional migration added for Owner.PasswordHash
+Database updated successfully for auth support.
+New migration completed
+TripBooking.CustomerId was changed to optional for Version 1
+A new migration was created and applied successfully
+Database updated to support nullable CustomerId
+AppDbContext code
+csharp
 using CarBookingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -684,144 +718,272 @@ namespace CarBookingAPI.Data
         public DbSet<TripBooking> TripBookings { get; set; }
     }
 }
-
-appsettings.json contains:
-- ConnectionStrings:DefaultConnection
-- Jwt:Key
-- Jwt:Issuer
-- Jwt:Audience
-
-Program.cs currently includes:
-- AppDbContext registration
-- JWT authentication configuration
-- Authorization
-- DI for AuthService and other services
-- app.UseAuthentication();
-- app.UseAuthorization();
-
-Current DI registration status:
-- IAuthService should be AddScoped.
-- IOwnerService should be AddScoped.
-- ICustomerService should be AddScoped if CustomerService uses EF Core.
-- ITripBookingService should be AddScoped.
-- ICarService may still be AddSingleton only if CarService is still in-memory.
-- Once CarService is converted to EF Core, it must be AddScoped too.
-
-Current/target Program.cs registration during EF migration:
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<ICarService, CarService>();   // temporary only if still in-memory
-builder.Services.AddScoped<IOwnerService, OwnerService>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
-builder.Services.AddScoped<ITripBookingService, TripBookingService>();
-
-After CarService EF Core conversion:
+appsettings.json contains
+ConnectionStrings:DefaultConnection
+Jwt:Key
+Jwt:Issuer
+Jwt:Audience
+Program.cs currently includes
+AppDbContext registration
+JWT authentication configuration
+Authorization
+DI for AuthService and other services
+csharp
+app.UseAuthentication();
+app.UseAuthorization();
+Current DI registration status
+IAuthService should be AddScoped
+IOwnerService should be AddScoped
+ICustomerService should be AddScoped if CustomerService uses EF Core
+ITripBookingService should be AddScoped
+ICarService must be AddScoped once CarService is fully EF Core-based
+Current/target Program.cs registration
+csharp
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IOwnerService, OwnerService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ITripBookingService, TripBookingService>();
-
-Important temporary note:
+Important temporary note
 During EF migration, some services may still be database-backed and some may still be in-memory.
+
 This can temporarily make trip booking behavior inconsistent.
+
 That is acceptable during step-by-step migration.
+
 Once CarService and all remaining services are EF Core-based, behavior should become consistent.
 
-What has been completed recently:
-1. DTO folder cleanup done and project runs.
-2. LocalDB verified:
-   (localdb)\MSSQLLocalDB worked.
-3. EF Core setup done.
-4. Initial migration successful.
-5. Database created successfully.
-6. OwnerService converted to EF Core.
-7. Owner saved from Swagger and verified in dbo.Owners table in SSMS.
-8. CustomerService conversion has likely been done or is near completion.
-9. Include() implemented in TripBookingService.
-10. ThenInclude() implemented where needed.
-11. Response DTO added for trip booking GET endpoints.
-12. Get all bookings uses TripBookingResponse.
-13. Get booking by id uses TripBookingResponse.
-14. History endpoints also converted to TripBookingResponse and tested.
-15. PasswordHash added to Owner.
-16. Auth DTOs added: RegisterRequest, LoginRequest, AuthResponse.
-17. IAuthService and AuthService added.
-18. JWT configured in Program.cs and appsettings.json.
-19. AuthController added.
-20. Register/login tested successfully.
-21. /api/auth/me tested successfully.
-22. Owner-authenticated trip history endpoint added and tested.
-23. Owner daily report implemented and tested.
-24. Owner monthly report implemented and tested.
-
-Current release strategy:
+What has been completed recently
+DTO folder cleanup done and project runs.
+LocalDB verified:
+text
+(localdb)\MSSQLLocalDB
+EF Core setup done.
+Initial migration successful.
+Database created successfully.
+OwnerService converted to EF Core.
+Owner saved from Swagger and verified in dbo.Owners table in SSMS.
+CustomerService conversion has likely been done or is near completion.
+Include() implemented in TripBookingService.
+ThenInclude() implemented where needed.
+Response DTO added for trip booking GET endpoints.
+Get all bookings uses TripBookingResponse.
+Get booking by id uses TripBookingResponse.
+History endpoints also converted to TripBookingResponse and tested.
+PasswordHash added to Owner.
+Auth DTOs added: RegisterRequest, LoginRequest, AuthResponse.
+IAuthService and AuthService added.
+JWT configured in Program.cs and appsettings.json.
+AuthController added.
+Register/login tested successfully.
+/api/auth/me tested successfully.
+Owner-authenticated trip history endpoint added and tested.
+Owner daily report implemented and tested.
+Owner monthly report implemented and tested.
+Owner dashboard summary method added in service layer.
+Owner-based car management has been improved or is being finalized.
+Owner-based booking creation has been improved or is being finalized.
+Booking lifecycle rules are working with availability changes.
+Non-essential Version 1 APIs have been identified for restriction/disablement.
+Customer APIs are now considered non-essential for Version 1.
+Generic owner CRUD APIs are now considered non-essential for Version 1.
+Version 1 endpoint cleanup and owner-only access hardening are in progress.
+TripBooking.CustomerId changed to optional for Version 1.
+Trip booking create flow updated in design to allow booking without customer requirement.
+Migration for optional CustomerId completed successfully.
+Security and testing discussion has started.
+Frontend planning prompt for React + Tailwind was prepared.
+Deployment direction decided:
+MySQL
+Docker
+Render
+Current release strategy
 Use vertical slice delivery instead of expanding many roles/features at once.
 
-Version 1 goal:
+Version 1 goal
 Owner-authenticated MVP with:
-- owner registration/login
-- authentication and authorization
-- owner-managed cars
-- owner-operated trip entry
-- owner trip history
-- owner daily report
-- owner monthly report
-- owner earnings
 
-Version roadmap:
-Version 1:
-- Owner login + auth
-- Owner manages cars
-- Owner manually enters trips
-- Owner sees reports and earnings
+owner registration/login
+authentication and authorization
+owner-managed cars
+owner-operated trip entry
+owner trip history
+owner daily report
+owner monthly report
+owner earnings
+Version roadmap
+Version 1
+Owner login + auth
+Owner manages cars
+Owner manually enters trips
+Owner sees reports and earnings
+Version 1.5 / Post-frontend + deployment stabilization
+After frontend is connected and Phase 1 is deployed:
 
-Version 2:
-- Better owner dashboard
-- Better filters and summaries
-- Date range and car-wise reports
-
-Version 3:
-- Driver role and driver trip entry
-
-Version 4:
-- Customer registration/login and booking flow
-
-Version 5:
-- Real trip workflow with richer statuses
-
-Version 6:
-- Admin, payments, ratings, notifications, advanced production features
-
-Immediate next task:
+Fix real frontend-backend integration issues
+Improve API security and endpoint consistency
+Improve owner dashboard experience
+Add better validation and error display patterns
+Add CORS configuration properly for frontend
+Review token handling from frontend usage
+Improve deployment reliability, environment config, and production readiness
+Add better response/error handling if needed
+Possibly add dashboard summary endpoint if not already done
+Version 2
+Better owner dashboard
+Better filters and summaries
+Date range reports
+Car-wise reports
+Stronger owner analytics and summary endpoints
+More polished frontend workflow for owners
+Version 3
+Driver role and driver trip entry
+Version 4
+Customer registration/login and booking flow
+Version 5
+Real trip workflow with richer statuses
+Version 6
+Admin, payments, ratings, notifications, advanced production features
+Immediate next task
 Continue based on the current Version 1 vertical slice progress.
 
-Top priority for release now:
-1. Finish owner-managed Version 1 flow completely
-2. Improve owner-specific access control further
-3. Decide whether trip creation should be adjusted to be more owner-operated for Version 1
-4. Improve owner car management so owner works with their own cars only
-5. Optionally add summary/dashboard endpoints after daily/monthly reports
+Top priority for release now
+Finish owner-managed Version 1 flow completely
+Improve owner-specific access control further
+Finalize owner-only car access flow fully
+Finalize owner-only trip flow fully
+Restrict or disable non-essential Version 1 APIs
+Final Swagger testing pass
+Security hardening review
+Prepare for frontend integration and deployment
+Important Version 1 business clarification
+There is no customer role in the initial release flow.
+There is no driver role in the initial release flow.
+The owner is the one who logs in and manually enters trip details.
+This is acceptable because Version 1 is an owner-operated MVP for fast release.
+Customer entity may remain in the system, but customer participation is optional/not required in Version 1 trip creation.
+Current status of the project
+The project is now in this state:
 
-Important Version 1 business clarification:
-- There is no customer role in the initial release flow.
-- There is no driver role in the initial release flow.
-- The owner is the one who logs in and manually enters trip details.
-- This is acceptable because Version 1 is an owner-operated MVP for fast release.
+Completed or mostly completed
+EF Core setup
+Authentication
+JWT
+Claims-based identity
+Owner reports
+Trip lifecycle business rules
+DTO cleanup
+Response DTO design
+Core Version 1 owner flow
+In progress / finalizing
+Owner-only car flow hardening
+Owner-only trip flow hardening
+Endpoint consistency cleanup
+Restricting/disabling non-essential Version 1 APIs
+Final testing
+Security review
+Next major phase
+Frontend development in React + Tailwind
+Production preparation
+MySQL migration
+Dockerization
+Render deployment
+Suggested teaching order from here
+Finalize owner-specific access control completely
+Finalize Version 1 endpoint cleanup
+Do final Swagger testing pass
+Review security of the application
+Prepare backend for frontend integration
+Migrate toward MySQL for production
+Dockerize app
+Deploy Phase 1
+Start post-deployment stabilization and Phase 2 owner improvements
 
-Suggested teaching order from here:
-1. Tighten owner-specific access control
-2. Review whether CreateTripBookingRequest / booking flow should be adapted for owner-operated Version 1
-3. Improve owner-only car endpoints
-4. Add owner dashboard summary endpoint
-5. Later convert services to async/await
-6. Later improve global response/error handling
 
-Please continue from the immediate next task:
-- Keep the teaching beginner-friendly and gradual.
-- Focus on the Version 1 vertical slice first.
-- Help me finish the owner-authenticated owner-operated MVP before expanding to customer/driver features.
-- Review my code when I send it.
+Version roadmap
+Version 1
+Goal: release the owner-operated MVP.
 
+What it includes:
+
+owner registration/login
+JWT authentication
+owner manages only their own cars
+owner manually enters trip records
+owner can complete/cancel trips
+owner can view trip history
+owner can view daily and monthly earnings reports
+Main focus:
+
+correctness
+owner-only security
+endpoint cleanup
+frontend-ready stable API
+Version 1.5
+Goal: stabilization after frontend integration and deployment.
+
+What it may include:
+
+fixing real frontend-backend integration issues
+improving endpoint consistency
+better error responses for frontend use
+CORS configuration
+token handling review
+dashboard summary endpoint exposure if needed
+production configuration cleanup
+deployment reliability improvements
+This version is more about polishing and stabilizing than adding big new business roles.
+
+Version 2
+Goal: improve the owner dashboard and reporting experience.
+
+What it may include:
+
+date range reports
+better analytics
+summary cards
+car-wise earnings/trip reports
+richer owner dashboard endpoints
+better filtering and history browsing
+This version strengthens the owner experience before expanding to other roles.
+
+Version 3
+Goal: introduce driver-related workflow.
+
+Possible additions:
+
+driver role
+driver trip entry
+assigning trips to drivers
+basic driver-specific history endpoints
+Version 4
+Goal: add real customer-side booking flow.
+
+Possible additions:
+
+customer register/login
+customer booking creation
+customer booking history
+customer-based trip flow instead of owner-only manual entry
+Version 5
+Goal: make the trip workflow more realistic.
+
+Possible additions:
+
+richer statuses
+more complete booking lifecycle
+acceptance/start/end states
+improved trip tracking logic
+Version 6
+Goal: broader production-level platform features.
+
+Possible additions:
+
+admin role
+payments
+notifications
+ratings/reviews
+more advanced security and operational features
 
 
 

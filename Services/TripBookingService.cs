@@ -188,6 +188,43 @@ namespace CarBookingAPI.Services
             return TripBookingResult.Ok("Booking completed successfully.", booking);
         }
 
+
+        public bool DeleteBooking(int tripId, int ownerId)
+        {
+            var trip = context.TripBookings
+                .Include(t => t.Car)
+                .FirstOrDefault(t => t.Id == tripId);
+
+
+            if (trip == null)
+            {
+                return false;
+            }
+
+
+            if (trip.Car == null)
+            {
+                return false;
+            }
+
+
+            if (trip.Car.OwnerId != ownerId)
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not authorized to delete this trip."
+                );
+            }
+
+
+            context.TripBookings.Remove(trip);
+            trip.Car.IsAvailable = true;
+
+            context.SaveChanges();
+
+            return true;
+        }
+
+
         public List<TripBookingResponse> GetBookingsByCustomerId(int customerId)
         {
             List<TripBooking> bookings = context.TripBookings

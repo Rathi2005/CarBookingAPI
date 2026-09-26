@@ -105,6 +105,44 @@ namespace CarBookingAPI.Services
             return true;
         }
 
+        public bool ToggleAvailability(
+            int carId,
+            int ownerId
+        )
+        {
+
+            var car = context.Cars
+                .FirstOrDefault(c => c.Id == carId);
+
+
+            if (car == null)
+            {
+                return false;
+            }
+
+
+            // Ownership verification
+
+            if (car.OwnerId != ownerId)
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not authorized to modify this car."
+                );
+            }
+
+
+
+            // Toggle status
+
+            car.IsAvailable = !car.IsAvailable;
+
+
+            context.SaveChanges();
+
+
+            return true;
+        }
+        
         public bool SetCarAvailability(int carId, bool isAvailable)
         {
             Car? car = context.Cars.FirstOrDefault(car => car.Id == carId);

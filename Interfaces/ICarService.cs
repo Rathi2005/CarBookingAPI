@@ -13,6 +13,10 @@ namespace CarBookingAPI.Interfaces
         Car AddCar(int ownerId, CreateCarRequest request);
         Car? UpdateCar(int id, int ownerId, UpdateCarRequest request);
         bool DeleteCar(int id, int ownerId);
+        bool ToggleAvailability(
+            int carId,
+            int ownerId
+        );
 
         bool SetCarAvailability(int carId, bool isAvailable);
         List<Car> GetAvailableCarsByOwnerId(int ownerId);

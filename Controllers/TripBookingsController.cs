@@ -171,6 +171,57 @@ namespace CarBookingAPI.Controllers
         }
 
         [Authorize(Roles = "Owner")]
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<bool> DeleteBooking([FromRoute] int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid booking id");
+            }
+
+            var ownerIdClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized("Invalid user identity");
+            }
+
+            try
+            {
+                var deleted = tripBookingService.DeleteBooking(id, ownerId);
+
+                if (!deleted)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Trip not found."
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Trip deleted successfully"
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [Authorize(Roles = "Owner")]
         [HttpGet("customer/{customerId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

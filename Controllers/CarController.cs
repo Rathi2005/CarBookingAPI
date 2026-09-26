@@ -146,6 +146,75 @@ namespace CarBookingAPI.Controllers
             return Ok("Car deleted successfully.");
         }
 
+        [Authorize(Roles = "Owner")]
+        [HttpPut("me/{id:int}/toggle-status")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult ToggleAvailability([FromRoute] int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Invalid car id"
+                });
+            }
+
+
+            var ownerIdClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Invalid user identity"
+                });
+            }
+
+
+            try
+            {
+                var result = carService.ToggleAvailability(
+                    id,
+                    ownerId
+                );
+
+
+                if (!result)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Car not found"
+                    });
+                }
+
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Car availability updated successfully"
+                });
+
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+
+        }
+
         [HttpGet("available")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<List<Car>> GetAvailableCars()

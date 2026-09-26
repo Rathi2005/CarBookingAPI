@@ -8,6 +8,8 @@ using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json.Serialization;
 
+// run => dotnet run --launch-profile https
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
@@ -58,6 +60,11 @@ builder.Services.AddSwaggerGen(options =>
         [new OpenApiSecuritySchemeReference("Bearer", document)] = []
     });
 });
+
+
+Console.WriteLine(
+ $"Environment: {builder.Environment.EnvironmentName}"
+);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

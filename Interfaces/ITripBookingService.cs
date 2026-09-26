@@ -12,6 +12,7 @@ namespace CarBookingAPI.Interfaces
         public TripBookingResult CreateBooking(int ownerId, CreateTripBookingRequest request);
         public TripBookingResult CancelBooking(int id, int ownerId);
         public TripBookingResult CompleteBooking(int id, int ownerId);
+        public bool DeleteBooking(int id, int ownerId);
         public List<TripBookingResponse> GetBookingsByCustomerId(int customerId);
         public List<TripBookingResponse> GetBookingsByCarId(int carId);
         public List<TripBookingResponse> GetOwnersBooking(int ownerId);

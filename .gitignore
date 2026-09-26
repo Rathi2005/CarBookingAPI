@@ -1,7 +1,6 @@
 # Build files
 bin/
 obj/
-appsettings.json
 
 # Visual Studio files
 .vs/

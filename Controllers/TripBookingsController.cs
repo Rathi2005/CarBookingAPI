@@ -222,6 +222,39 @@ namespace CarBookingAPI.Controllers
         }
 
         [Authorize(Roles = "Owner")]
+        [HttpPut("{id:int}/payment-received")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> MarkPaymentReceived(int id)
+        {
+            var ownerIdClaim = User.FindFirstValue(
+        ClaimTypes.NameIdentifier
+    );
+
+
+            if (!int.TryParse(ownerIdClaim, out int ownerId))
+            {
+                return Unauthorized();
+            }
+            
+            var result = await tripBookingService.MarkPaymentReceived(id, ownerId);
+
+
+            if (!result)
+            {
+                return NotFound();
+            }
+
+
+            return Ok(new
+            {
+                message = "Payment marked as received"
+            });
+        }
+
+        [Authorize(Roles = "Owner")]
         [HttpGet("customer/{customerId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

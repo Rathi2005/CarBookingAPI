@@ -822,6 +822,100 @@ Please continue from the immediate next task:
 - Help me finish the owner-authenticated owner-operated MVP before expanding to customer/driver features.
 - Review my code when I send it.
 
+1. Owner Scoped Car Routes 🔒
+
+Updated car APIs to validate ownership using JWT OwnerId.
+
+Edit Car
+
+Old:
+
+PUT /Cars/{id}
+
+New:
+
+PUT /Cars/me/{id}
+
+Flow:
+
+JWT OwnerId
+      ↓
+Find Car
+      ↓
+Verify Car.OwnerId
+      ↓
+Allow Update
+2. Car Availability Toggle
+
+Added:
+
+PUT /Cars/me/{id}/toggle-status
+
+Flow:
+
+JWT OwnerId
+      ↓
+Validate Car Ownership
+      ↓
+Toggle Availability
+      ↓
+Save Changes
+3. Trip Delete Security 🔒
+
+Updated:
+
+DELETE /TripBookings/{id}
+
+Validation:
+
+JWT OwnerId
+      ↓
+Find Trip
+      ↓
+Check Trip.Car.OwnerId
+      ↓
+Delete Allowed
+
+Unauthorized owners receive:
+
+403 Forbidden
+4. Active Trip Delete Workflow
+
+Only active trips can be deleted.
+
+Flow:
+
+Delete Active Trip
+
+        ↓
+
+Remove Trip Record
+
+        ↓
+
+Make Car Available
+
+        ↓
+
+Save Changes
+5. Vehicle Availability Handling
+
+Trip lifecycle:
+
+Trip Created
+      ↓
+Car Unavailable
+
+
+Trip Completed / Cancelled
+      ↓
+Car Available
+
+
+
+
+
+
 
 
 

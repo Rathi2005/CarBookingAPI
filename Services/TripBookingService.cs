@@ -33,7 +33,8 @@ namespace CarBookingAPI.Services
                 TotalPrice = booking.TotalPrice,
                 DistanceInKm = booking.DistanceInKm,
                 Status = booking.Status,
-                BookingDate = booking.BookingDate
+                BookingDate = booking.BookingDate,
+                IsPaymentReceived = booking.IsPaymentReceived
             };
         }
 
@@ -224,6 +225,31 @@ namespace CarBookingAPI.Services
             return true;
         }
 
+        public async Task<bool> MarkPaymentReceived(int tripId, int ownerId)
+        {
+            var trip = await context.TripBookings
+                        .Include(t => t.Car)
+                        .FirstOrDefaultAsync(
+                            t => t.Id == tripId &&
+                            t.Car.OwnerId == ownerId
+                        );
+
+
+            if (trip == null)
+            {
+                return false;
+            }
+
+
+            trip.IsPaymentReceived = true;
+
+
+            await context.SaveChangesAsync();
+
+
+            return true;
+        }
+
 
         public List<TripBookingResponse> GetBookingsByCustomerId(int customerId)
         {
@@ -320,8 +346,17 @@ namespace CarBookingAPI.Services
                 CompletedTrips = trips.Count(trip => trip.Status == TripBookingStatus.Completed),
                 CancelledTrips = trips.Count(trip => trip.Status == TripBookingStatus.Cancelled),
                 TotalEarnings = (double)trips
-                    .Where(trip => trip.Status == TripBookingStatus.Completed)
-                    .Sum(trip => trip.TotalPrice)
+                                .Where(trip =>
+                                    trip.Status == TripBookingStatus.Completed &&
+                                    trip.IsPaymentReceived
+                                )
+                                .Sum(trip => trip.TotalPrice),
+                TotalPendingPayments = (double)trips
+                                .Where(trip =>
+                                    trip.Status == TripBookingStatus.Completed &&
+                                    !trip.IsPaymentReceived
+                                )
+                                .Sum(trip => trip.TotalPrice)                
             };
         }
 

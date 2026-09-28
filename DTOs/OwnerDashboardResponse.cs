@@ -10,5 +10,6 @@
         public int CompletedTrips { get; set; }
         public int CancelledTrips { get; set; }
         public double TotalEarnings { get; set; }
+        public double TotalPendingPayments { get; set; }
     }
 }

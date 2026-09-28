@@ -11,7 +11,8 @@
         public double TotalPrice { get; set; }
         public DateTime BookingDate { get; set; }
         public string Status { get; set; }
-
+        // Payment received from driver
+        public bool IsPaymentReceived { get; set; } = false;
         // these below fields tells that the tripbooking has a car and a customer 
         // we will define the relationship in the AppDbContext file.
         public Customer? Customer { get; set; } = null!;
@@ -39,6 +40,7 @@
             TotalPrice = totalPrice;
             BookingDate = DateTime.Now;
             Status = TripBookingStatus.Active;
+            IsPaymentReceived = false;
         }
     }
 }

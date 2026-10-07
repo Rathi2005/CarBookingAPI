@@ -24,16 +24,28 @@ namespace CarBookingAPI.Services
             return new TripBookingResponse
             {
                 Id = booking.Id,
+
                 CustomerName = booking.Customer?.Name ?? string.Empty,
+
                 CarBrand = booking.Car?.Brand ?? string.Empty,
                 CarModel = booking.Car?.Model ?? string.Empty,
+                CarNumberPlate = booking.Car?.NumberPlate ?? string.Empty,
+                CarImageUrl = booking.Car?.ImageUrl ?? string.Empty,
+
+                DriverName = booking.Car?.DriverName ?? string.Empty,
+                DriverPhoneNumber = booking.Car?.DriverPhoneNumber ?? string.Empty,
+
                 OwnerName = booking.Car?.Owner?.Name ?? string.Empty,
+
                 PickupLocation = booking.PickupLocation,
                 DropLocation = booking.DropLocation,
+
                 TotalPrice = booking.TotalPrice,
                 DistanceInKm = booking.DistanceInKm,
+
                 Status = booking.Status,
                 BookingDate = booking.BookingDate,
+
                 IsPaymentReceived = booking.IsPaymentReceived
             };
         }
@@ -356,7 +368,7 @@ namespace CarBookingAPI.Services
                                     trip.Status == TripBookingStatus.Completed &&
                                     !trip.IsPaymentReceived
                                 )
-                                .Sum(trip => trip.TotalPrice)                
+                                .Sum(trip => trip.TotalPrice)
             };
         }
 

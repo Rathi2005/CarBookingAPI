@@ -54,7 +54,11 @@ namespace CarBookingAPI.Services
                 Model = request.Model,
                 Year = request.Year,
                 PricePerKm = request.PricePerKm,
-                IsAvailable = true
+                IsAvailable = true,
+                NumberPlate = request.NumberPlate,
+                ImageUrl = request.ImageUrl,
+                DriverName = request.DriverName,
+                DriverPhoneNumber = request.DriverPhoneNumber
             };
 
             context.Cars.Add(car);
@@ -77,6 +81,10 @@ namespace CarBookingAPI.Services
             car.Model = request.Model;
             car.Year = request.Year;
             car.PricePerKm = request.PricePerKm;
+            car.NumberPlate = request.NumberPlate;
+            car.ImageUrl = request.ImageUrl;
+            car.DriverName = request.DriverName;
+            car.DriverPhoneNumber = request.DriverPhoneNumber;
 
             context.SaveChanges();
 
@@ -142,7 +150,7 @@ namespace CarBookingAPI.Services
 
             return true;
         }
-        
+
         public bool SetCarAvailability(int carId, bool isAvailable)
         {
             Car? car = context.Cars.FirstOrDefault(car => car.Id == carId);

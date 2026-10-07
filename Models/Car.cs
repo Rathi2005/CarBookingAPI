@@ -9,6 +9,11 @@
         public double PricePerKm { get; set; }
         public bool IsAvailable { get; set; }
         public int OwnerId { get; set; }
+        public string NumberPlate { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+        public string? DriverName { get; set; }
+        public string? DriverPhoneNumber { get; set; }
+
 
         public Owner Owner { get; set; } = null!;
         public List<TripBooking> TripBookings { get; set; } = new List<TripBooking>();

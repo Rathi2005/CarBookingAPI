@@ -913,6 +913,31 @@ Car Available
 
 
 
+We added payment settlement tracking at the trip level.
+
+Added IsPaymentReceived boolean field in TripBooking model to track whether the owner has received money from the driver.
+Updated trip response DTOs so APIs return:
+{
+  "isPaymentReceived": true/false
+}
+Added a new API endpoint:
+PUT /api/TripBookings/{id}/payment-received
+
+This allows an owner to mark a completed trip payment as received.
+
+Updated dashboard earnings calculation:
+Previously counted all completed trips.
+Now only counts trips where:
+Status = Completed
+AND
+IsPaymentReceived = true
+Added pending payment calculation:
+Status = Completed
+AND
+IsPaymentReceived = false
+
+This represents money still pending from drivers.
+
 
 
 

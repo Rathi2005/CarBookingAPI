@@ -22,6 +22,8 @@
         public double TotalPrice { get; set; }
         public double DistanceInKm { get; set; }
 
+        public double TripExpenses { get; set; }
+
         public string Status { get; set; } = string.Empty;
 
         public DateTime BookingDate { get; set; }

@@ -20,5 +20,11 @@ namespace CarBookingAPI.DTOs
 
         [Range(1, 10000, ErrorMessage = "Distance must be between 1 and 10000 km.")]
         public double DistanceInKm { get; set; }
+
+        [Range(0, 10000000, ErrorMessage = "Trip price must be between 0 and 10000000.")]
+        public double TotalPrice { get; set; }
+
+        [Range(0, 10000000, ErrorMessage = "Trip expenses must be between 0 and 10000000.")]
+        public double TripExpenses { get; set; }
     }
 }

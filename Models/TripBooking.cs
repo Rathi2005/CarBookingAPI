@@ -9,6 +9,8 @@
         public string DropLocation { get; set; }
         public double DistanceInKm { get; set; }
         public double TotalPrice { get; set; }
+
+        public double TripExpenses { get; set; }
         public DateTime BookingDate { get; set; }
         public string Status { get; set; }
         // Payment received from driver
@@ -29,7 +31,8 @@
             string pickupLocation,
             string dropLocation,
             double distanceInKm,
-            double totalPrice)
+            double totalPrice,
+            double tripExpenses)
         {
             Id = id;
             CustomerId = customerId;
@@ -38,6 +41,7 @@
             DropLocation = dropLocation;
             DistanceInKm = distanceInKm;
             TotalPrice = totalPrice;
+            TripExpenses = tripExpenses;
             BookingDate = DateTime.Now;
             Status = TripBookingStatus.Active;
             IsPaymentReceived = false;

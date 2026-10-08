@@ -41,6 +41,7 @@ namespace CarBookingAPI.Services
                 DropLocation = booking.DropLocation,
 
                 TotalPrice = booking.TotalPrice,
+                TripExpenses = booking.TripExpenses,
                 DistanceInKm = booking.DistanceInKm,
 
                 Status = booking.Status,
@@ -131,7 +132,8 @@ namespace CarBookingAPI.Services
                 PickupLocation = request.PickupLocation,
                 DropLocation = request.DropLocation,
                 DistanceInKm = request.DistanceInKm,
-                TotalPrice = request.DistanceInKm * car.PricePerKm,
+                TotalPrice = request.TotalPrice,
+                TripExpenses = request.TripExpenses,
                 BookingDate = DateTime.Now,
                 Status = TripBookingStatus.Active
             };

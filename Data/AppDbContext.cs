@@ -36,6 +36,8 @@ namespace CarBookingAPI.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Car> Cars { get; set; }
         public DbSet<TripBooking> TripBookings { get; set; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }
 

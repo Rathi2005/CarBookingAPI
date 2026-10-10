@@ -115,6 +115,35 @@ namespace CarBookingAPI.Migrations
                     b.ToTable("Owners");
                 });
 
+            modelBuilder.Entity("CarBookingAPI.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("CarBookingAPI.Models.TripBooking", b =>
                 {
                     b.Property<int>("Id")
@@ -169,6 +198,17 @@ namespace CarBookingAPI.Migrations
                         .WithMany("Cars")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("CarBookingAPI.Models.RefreshToken", b =>
+                {
+                    b.HasOne("CarBookingAPI.Models.Owner", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Owner");

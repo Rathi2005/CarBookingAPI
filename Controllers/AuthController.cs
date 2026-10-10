@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-
 namespace CarBookingAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -44,6 +43,27 @@ namespace CarBookingAPI.Controllers
             return Ok(response);
         }
 
+        [HttpPost("refresh")]
+        public ActionResult<AuthResponse> Refresh([FromBody] RefreshRequest request)
+        {
+            AuthResponse? response = authService.Refresh(request.RefreshToken);
+
+            if (response is null)
+            {
+                return Unauthorized("Refresh token is invalid, expired, or revoked.");
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout([FromBody] RefreshRequest request)
+        {
+            authService.RevokeRefreshToken(request.RefreshToken);
+
+            return Ok(new { message = "Logged out successfully." });
+        }
+
         [Authorize]
         [HttpGet("me")]
         public ActionResult<object> GetMe()
@@ -61,6 +81,5 @@ namespace CarBookingAPI.Controllers
                 Role = role
             });
         }
-
     }
 }

@@ -361,8 +361,7 @@ namespace CarBookingAPI.Services
                 CancelledTrips = trips.Count(trip => trip.Status == TripBookingStatus.Cancelled),
                 TotalEarnings = (double)trips
                                 .Where(trip =>
-                                    trip.Status == TripBookingStatus.Completed &&
-                                    trip.IsPaymentReceived
+                                    trip.Status == TripBookingStatus.Completed
                                 )
                                 .Sum(trip => trip.TotalPrice),
                 TotalPendingPayments = (double)trips

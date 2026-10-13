@@ -86,8 +86,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICarService ,CarService>(); // dependency injection registration
-builder.Services.AddScoped<IOwnerService ,OwnerService>();
+builder.Services.AddScoped<ICarService, CarService>(); // dependency injection registration
+builder.Services.AddScoped<IOwnerService, OwnerService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ITripBookingService, TripBookingService>();
 
@@ -105,19 +105,22 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-            .WithOrigins(
-                "http://localhost:5173",
-                "https://trip-booking-swart.vercel.app"
-            )
-            // This dynamically checks and accepts any Vercel preview or branch deployment URL
-                .SetIsOriginAllowed(origin => 
+                .SetIsOriginAllowed(origin =>
                 {
-                    var host = new Uri(origin).Host;
-                    return host.Equals("trip-booking-swart.vercel.app", StringComparison.OrdinalIgnoreCase) || 
-                           host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase);
+                    if (!Uri.TryCreate(
+                        origin,
+                        UriKind.Absolute,
+                        out var uri))
+                    {
+                        return false;
+                    }
+
+                    return
+    uri.Host == "localhost" ||
+    uri.Host == "trip-booking-swart.vercel.app";
                 })
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+                .AllowAnyHeader()
+                .AllowAnyMethod();
         });
 });
 

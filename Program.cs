@@ -107,7 +107,7 @@ builder.Services.AddCors(options =>
             policy
             .WithOrigins(
                 "http://localhost:5173",
-                "https://trip-booking-swart.vercel.app/"
+                "https://carbookingapi.onrender.com/"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();

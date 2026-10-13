@@ -107,8 +107,15 @@ builder.Services.AddCors(options =>
             policy
             .WithOrigins(
                 "http://localhost:5173",
-                "https://carbookingapi.onrender.com/"
+                "https://trip-booking-swart.vercel.app"
             )
+            // This dynamically checks and accepts any Vercel preview or branch deployment URL
+                .SetIsOriginAllowed(origin => 
+                {
+                    var host = new Uri(origin).Host;
+                    return host.Equals("trip-booking-swart.vercel.app", StringComparison.OrdinalIgnoreCase) || 
+                           host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase);
+                })
             .AllowAnyHeader()
             .AllowAnyMethod();
         });

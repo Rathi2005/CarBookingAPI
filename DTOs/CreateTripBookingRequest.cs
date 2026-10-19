@@ -18,6 +18,9 @@ namespace CarBookingAPI.DTOs
         [StringLength(100, MinimumLength = 2, ErrorMessage = "Drop location must be between 2 and 100 characters.")]
         public string DropLocation { get; set; } = string.Empty;
 
+        [Required]
+        public DateTime BookingDate { get; set; }
+
         [Range(1, 10000, ErrorMessage = "Distance must be between 1 and 10000 km.")]
         public double DistanceInKm { get; set; }
 

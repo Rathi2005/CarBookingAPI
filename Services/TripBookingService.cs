@@ -120,11 +120,6 @@ namespace CarBookingAPI.Services
                 return TripBookingResult.Fail("Car is not available.");
             }
 
-            if (request.DistanceInKm <= 0)
-            {
-                return TripBookingResult.Fail("Distance must be greater than zero.");
-            }
-
             TripBooking booking = new TripBooking
             {
                 CustomerId = request.CustomerId,

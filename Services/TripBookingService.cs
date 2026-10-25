@@ -129,7 +129,7 @@ namespace CarBookingAPI.Services
                 DistanceInKm = request.DistanceInKm,
                 TotalPrice = request.TotalPrice,
                 TripExpenses = request.TripExpenses,
-                BookingDate = DateTime.Now,
+                BookingDate = request.BookingDate,
                 Status = TripBookingStatus.Active
             };
 
